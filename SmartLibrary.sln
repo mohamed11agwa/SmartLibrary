@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36518.9 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartLibrary.Web", "SmartLibrary.Web\SmartLibrary.Web.csproj", "{AFF3F3D7-2D1D-4050-87E2-33830E91F715}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AFF3F3D7-2D1D-4050-87E2-33830E91F715}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFF3F3D7-2D1D-4050-87E2-33830E91F715}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFF3F3D7-2D1D-4050-87E2-33830E91F715}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFF3F3D7-2D1D-4050-87E2-33830E91F715}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {50192E85-27D3-42EA-B557-74F419FF4682}
+	EndGlobalSection
+EndGlobal
