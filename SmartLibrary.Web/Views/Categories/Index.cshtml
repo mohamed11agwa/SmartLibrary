@@ -1,1 +1,117 @@
-﻿<h1>Categoreis</h1>
+﻿@model IEnumerable<Category>
+
+@{
+    ViewData["Title"] = "Categories";
+}
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h3 class="card-title">
+            <div class="symbol symbol-40px me-4">
+                <div class="symbol-label fs-2 fw-semibold text-success">
+                    <!--begin::Svg Icon | path: icons/duotune/general/gen002.svg-->
+                    <span class="svg-icon svg-icon-2 svg-icon-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
+                            <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.6.6 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.6.6 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.6.6 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535z" />
+                            <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.6.6 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0z" />
+                        </svg>
+
+                    </span>
+                    <!--end::Svg Icon-->
+                </div>
+            </div>
+            Categories
+        </h3>
+        <div class="card-toolbar">
+            <a asp-controller ="Categories" asp-action ="Create" class="btn btn-sm btn-primary d-flex align-items-center">
+                <i class="bi bi-plus-square-dotted"></i>
+                Add
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        @if (!Model.Any())
+        {
+            <div class="alert alert-dismissible bg-light-warning border border-warning border-dashed d-flex flex-column flex-sm-row w-100 p-5 mb-10">
+                <!--begin::Icon-->
+                <i class="ki-duotone ki-message-text-2 fs-2hx text-warning me-4 mb-5 mb-sm-0 bi bi-exclamation-circle-fill"></i>
+                
+                <!--end::Icon-->
+                <!--begin::Content-->
+                <div class="d-flex flex-column pe-0 pe-sm-10 align-self-center">
+                    <h5 class="mb-1">No Categories Found !</h5>
+                </div>
+                <!--end::Content-->
+            </div>
+        }
+        else
+        {
+			<div class="table-responsive">
+				<table class="table table-row-dashed table-row-gray-300 gy-7">
+					<thead>
+						<tr class="fw-bold fs-6 text-gray-800">
+							<th>Name</th>
+							<th>Status</th>
+							<th>Created On</th>
+							<th>Last Updated On</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+                        @foreach(var category in Model)
+                        {
+                            <tr>
+                                <td>@category.Name</td>
+                                <td>
+                                    <span class="badge badge-light-@(category.IsDeleted ? "danger" : "success")">
+                                        @(category.IsDeleted? "Deleted" : "Available")
+                                    </span>
+                                     
+                                </td>
+                                <td>@category.CreatedOn</td>
+                                <td>@category.LastUpdatedOn</td>
+                                <td>
+                                    @* <a class="btn btn-sm btn-outline btn-outline-dashed btn-outline-primary btn-active-light-primary"
+                                                            asp-controller="Categories" asp-action="Edit" asp-route-id ="@category.Id">
+                                        Edit
+                                    </a> *@
+                                    <button type="button" class="btn btn-sm btn-icon btn-color-primary btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                                        <!--begin::Svg Icon | path: icons/duotune/general/gen024.svg-->
+                                        <span class="svg-icon svg-icon-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24">
+                                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                    <rect x="5" y="5" width="5" height="5" rx="1" fill="currentColor"></rect>
+                                                    <rect x="14" y="5" width="5" height="5" rx="1" fill="currentColor" opacity="0.3"></rect>
+                                                    <rect x="5" y="14" width="5" height="5" rx="1" fill="currentColor" opacity="0.3"></rect>
+                                                    <rect x="14" y="14" width="5" height="5" rx="1" fill="currentColor" opacity="0.3"></rect>
+                                                </g>
+                                            </svg>
+                                        </span>
+                                        <!--end::Svg Icon-->
+                                    </button>
+									<div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-semibold w-200px py-3" data-kt-menu="true" style="z-index: 107;">
+										
+
+										<!--begin::Menu item-->
+										<div class="menu-item px-3">
+                                            <a class="menu-link px-3" asp-controller="Categories" asp-action="Edit" asp-route-id="@category.Id">Edit</a>
+										</div>
+										<!--end::Menu item-->
+
+										<!--begin::Menu item-->
+										<div class="menu-item px-3">
+											<a href="#" class="menu-link flex-stack px-3">
+												 Toggle Status
+											</a>
+										</div>
+										<!--end::Menu item-->
+										
+									</div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+				</table>
+			</div>
+        }
+    </div>
+</div>
