@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SmartLibrary.Web.Core.Models;
 
 namespace SmartLibrary.Web.Controllers
 {
@@ -14,8 +16,60 @@ namespace SmartLibrary.Web.Controllers
         public IActionResult Index()
         {
             //TODO: use ViewModel
-            var categories = _context.Categories.ToList();
+            var categories = _context.Categories.AsNoTracking().ToList();
             return View(categories);
         }
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View("Form");
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(CategoryViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View("Form" ,model);
+            var Category = new Category()
+            {
+                Name = model.Name
+            };
+            _context.Add(Category);
+            _context.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            var category = _context.Categories.Find(id);
+            if (category is null)
+                return NotFound();
+            CategoryViewModel viewModel = new CategoryViewModel()
+            {
+                Id = id,
+                Name = category.Name
+                
+            };
+            return View("Form", viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(CategoryViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View("Form", model);
+            var category = _context.Categories.Find(model.Id);
+            if (category is null)
+                return NotFound();
+            category.Name = model.Name;
+            category.LastUpdatedOn = DateTime.Now;
+            _context.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
+        }
+
     }
 }
