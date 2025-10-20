@@ -1,4 +1,4 @@
-namespace SmartLibrary.Web.Models
+namespace SmartLibrary.Web.Core.ViewModels
 {
     public class ErrorViewModel
     {

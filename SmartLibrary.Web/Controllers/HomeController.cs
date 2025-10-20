@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using SmartLibrary.Web.Models;
+using SmartLibrary.Web.Core.ViewModels;
 
 namespace SmartLibrary.Web.Controllers
 {
