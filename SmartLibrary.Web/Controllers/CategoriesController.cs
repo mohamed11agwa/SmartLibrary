@@ -19,24 +19,27 @@ namespace SmartLibrary.Web.Controllers
             var categories = _context.Categories.AsNoTracking().ToList();
             return View(categories);
         }
+
         [HttpGet]
         public IActionResult Create()
         {
-            return View("Form");
+            return PartialView("_Form");
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(CategoryViewModel model)
         {
             if (!ModelState.IsValid)
-                return View("Form" ,model);
+                return View("_Form" ,model);
             var Category = new Category()
             {
                 Name = model.Name
             };
             _context.Add(Category);
             _context.SaveChanges();
-
+            //Send Alerts Controllers to Views.
+            TempData["Message"] = "Saved Successfully";
             return RedirectToAction(nameof(Index));
         }
 
@@ -52,7 +55,7 @@ namespace SmartLibrary.Web.Controllers
                 Name = category.Name
                 
             };
-            return View("Form", viewModel);
+            return View("_Form", viewModel);
         }
 
         [HttpPost]
@@ -60,16 +63,29 @@ namespace SmartLibrary.Web.Controllers
         public IActionResult Edit(CategoryViewModel model)
         {
             if (!ModelState.IsValid)
-                return View("Form", model);
+                return View("_Form", model);
             var category = _context.Categories.Find(model.Id);
             if (category is null)
                 return NotFound();
             category.Name = model.Name;
             category.LastUpdatedOn = DateTime.Now;
             _context.SaveChanges();
-
+            TempData["Message"] = "Saved Successfully";
             return RedirectToAction(nameof(Index));
         }
 
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ToggleStatus(int id)
+        {
+            var category = _context.Categories.Find(id);
+            if (category is null)
+                return NotFound();
+            category.IsDeleted = !category.IsDeleted;
+            category.LastUpdatedOn = DateTime.Now;
+            _context.SaveChanges();
+            return Ok(category.LastUpdatedOn.ToString());
+        }
     }
 }
