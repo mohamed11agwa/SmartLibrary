@@ -1,6 +1,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Identity.Client;
 using SmartLibrary.Web.Data;
+using SmartLibrary.Web.Mapping;
+using System.Reflection;
+
 
 namespace SmartLibrary.Web
 {
@@ -19,6 +24,8 @@ namespace SmartLibrary.Web
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddAutoMapper(op => op.AddProfile<MappingProfile>());
 
             var app = builder.Build();
 

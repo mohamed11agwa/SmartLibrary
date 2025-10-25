@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SmartLibrary.Web.Core.Models;
 using SmartLibrary.Web.Filters;
@@ -8,17 +9,21 @@ namespace SmartLibrary.Web.Controllers
     public class CategoriesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
 
-        public CategoriesController(ApplicationDbContext context)
+        public CategoriesController(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         public IActionResult Index()
         {
-            //TODO: use ViewModel
+            
             var categories = _context.Categories.AsNoTracking().ToList();
-            return View(categories);
+            var viewModel = _mapper.Map<IEnumerable<CategoryViewModel>>(categories);
+
+            return View(viewModel);
         }
 
         [HttpGet]
@@ -30,20 +35,20 @@ namespace SmartLibrary.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(CategoryViewModel model)
+        public IActionResult Create(CategoryFormViewModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            var category = new Category()
-            {
-                Name = model.Name
-            };
+            var category = _mapper.Map<Category>(model);
             _context.Add(category);
             _context.SaveChanges();
             //Send Alerts Controllers to Views.
             //TempData["Message"] = "Saved Successfully";
             //return RedirectToAction(nameof(Index));
-            return PartialView("_CategoryRow", category);
+
+            var viewModel = _mapper.Map<CategoryViewModel>(category);
+
+            return PartialView("_CategoryRow", viewModel);
         }
 
         [HttpGet]
@@ -53,28 +58,25 @@ namespace SmartLibrary.Web.Controllers
             var category = _context.Categories.Find(id);
             if (category is null)
                 return NotFound();
-            CategoryViewModel viewModel = new CategoryViewModel()
-            {
-                Id = id,
-                Name = category.Name
-                
-            };
+            CategoryFormViewModel viewModel = _mapper.Map<CategoryFormViewModel>(category);
             return PartialView("_Form", viewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(CategoryViewModel model)
+        public IActionResult Edit(CategoryFormViewModel model)
         {
             if (!ModelState.IsValid)
                 BadRequest();
             var category = _context.Categories.Find(model.Id);
             if (category is null)
                 return NotFound();
-            category.Name = model.Name;
+            category = _mapper.Map(model, category);
             category.LastUpdatedOn = DateTime.Now;
             _context.SaveChanges();
-            return PartialView("_CategoryRow", category);
+            var viewModel = _mapper.Map<CategoryViewModel>(category);
+
+            return PartialView("_CategoryRow", viewModel);
 
         }
 
@@ -90,6 +92,13 @@ namespace SmartLibrary.Web.Controllers
             category.LastUpdatedOn = DateTime.Now;
             _context.SaveChanges();
             return Ok(category.LastUpdatedOn.ToString());
+        }
+
+        public IActionResult AllowItem(CategoryFormViewModel model)
+        {
+            var category = _context.Categories.SingleOrDefault(c => c.Name == model.Name);
+            var isAllowed = category is null || category.Id.Equals(model.Id);
+            return Json(isAllowed);
         }
     }
 }
