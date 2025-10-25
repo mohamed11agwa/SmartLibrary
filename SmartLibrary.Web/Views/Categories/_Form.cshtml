@@ -1,7 +1,11 @@
-﻿@model CategoryViewModel
+﻿@model CategoryFormViewModel
 
 <form asp-action="@(Model?.Id > 0 ? "Edit":"Create")" data-ajax-method="post" data-ajax="true"
-      data-ajax-success="OnModalSuccess" data-ajax-failure="ShowErrorMessage">
+      data-ajax-begin="OnModalBegin"
+      data-ajax-success="OnModalSuccess"
+      data-ajax-failure="ShowErrorMessage"
+      data-ajax-complete="OnModalComplete">
+
     @if (Model?.Id > 0)
     {
         <input type="hidden" asp-for="Id" />
@@ -12,7 +16,7 @@
             <label asp-for="Name"></label>
         </div>
 
-        <span asp-validation-for="Name" class="text-danger"></span>
+        <span asp-validation-for="Name" class="text-danger d-block"></span>
     </div>
     <partial name="_ModalFooter"/>
 </form>

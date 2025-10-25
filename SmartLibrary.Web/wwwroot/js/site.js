@@ -23,18 +23,28 @@ function ShowErrorMessage(message = "Something went wrong!") {
     });
 }
 
+function OnModalBegin() {
+    $('body :submit').attr('disabled', 'disabled').attr('data-kt-indicator', 'on');
+}
 function OnModalSuccess(row) {
     ShowSuccessMessage();
     $('#Modal').modal('hide');
+
     if (UpdatedRow !== undefined) {
         datatable.row(UpdatedRow).remove().draw();
         UpdatedRow = undefined;
     }
     var newRow = $(row);
-    datatable.row.add(newRow).draw();
+    datatable.row.add(newRow).draw(false);
 
     KTMenu.init();
-    KTMenu.initHandlers();
+    KTMenu.initGlobalHandlers();
+
+    
+}
+
+function OnModalComplete() {
+    $('body :submit').removeAttr('disabled').removeAttr('data-kt-indicator');
 }
 
 //Datatable
@@ -52,7 +62,6 @@ var KTDatatables = function () {
         // Init datatable --- more info on datatables: https://datatables.net/manual/
         datatable = $(table).DataTable({
             "info": false,
-            'order': [],
             'pageLength': 10,
         });
     }
@@ -138,16 +147,17 @@ var KTDatatables = function () {
 
 
 $(document).ready(function () {
+
     //sweetAlert
     var message = $('#Message').text();
     if (message !== '') {
         ShowSuccessMessage(message);
     }
+
     //datatable
     KTUtil.onDOMContentLoaded(function () {
         KTDatatables.init();
     });
-
 
     //handle bootstrap modal
     $('body').delegate('.js-render-modal' ,'click', function () {
@@ -172,7 +182,59 @@ $(document).ready(function () {
         modal.modal('show');
     });
 
+    //Handle ToggleStatus
+    $('body').delegate('.js-toggle-status', 'click', function () {
+        // console.log("Button Clicked");
+        var btn = $(this);
+        // console.log(btn.data('id'));
+        // var result = confirm("Are you Sure that you need to toggle this item status?");
 
+        bootbox.confirm({
+            message: 'Are you Sure that you need to toggle this item status?',
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-danger'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-secondary'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                    $.post({
+                        url: btn.data('url'),
+                        data: {
+                            '__RequestVerificationToken': $('input[name = "__RequestVerificationToken"]').val()
+
+                        },
+                        success: function (LastUpdatedOn) {
+                            // js-update-on
+                            var row = btn.parents('tr');
+                            var status = row.find('.js-status');
+                            var newStatus = status.text().trim() === "Deleted" ? "Available" : "Deleted";
+                            status.text(newStatus).toggleClass('badge-light-success badge-light-danger');
+                            row.find('.js-update-on').html(LastUpdatedOn);
+                            row.addClass('animate__animated animate__flash');
+
+                            ShowSuccessMessage();
+
+                        },
+                        error: function () {
+                            ShowErrorMessage();
+
+                        }
+                    });
+                }
+            }
+        });
+
+
+
+
+
+    });
 
 
 });
