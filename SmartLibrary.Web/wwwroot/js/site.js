@@ -37,8 +37,12 @@ function OnModalSuccess(row) {
     var newRow = $(row);
     datatable.row.add(newRow).draw(false);
 
-    KTMenu.init();
-    KTMenu.initGlobalHandlers();
+    //KTMenu.init();
+
+    setTimeout(function () {
+        KTMenu.init();
+        KTMenu.initHandlers();
+    }, 100);
 
     
 }

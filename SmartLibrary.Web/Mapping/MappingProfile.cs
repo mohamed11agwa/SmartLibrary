@@ -11,6 +11,11 @@ namespace SmartLibrary.Web.Mapping
             //Category
             CreateMap<Category, CategoryViewModel>();
             CreateMap<CategoryFormViewModel, Category>().ReverseMap();
+
+
+            //Author
+            CreateMap<Author, AuthorViewModel>();
+            CreateMap<AuthorFormViewModel, Author>().ReverseMap();
         }
     }
 }

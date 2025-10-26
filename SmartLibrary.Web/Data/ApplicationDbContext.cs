@@ -11,6 +11,8 @@ namespace SmartLibrary.Web.Data
         {
         }
         public virtual DbSet<Category> Categories { get; set; }
+        public virtual DbSet<Author> Authors { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             //builder.Entity<Category>()
