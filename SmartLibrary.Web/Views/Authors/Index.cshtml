@@ -1,9 +1,9 @@
-﻿@model IEnumerable<CategoryViewModel>
+﻿@model IEnumerable<AuthorViewModel>
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery antiforgery
 @{
-    ViewData["Title"] = "Categories";
+    ViewData["Title"] = "Authors";
 }
-@section Styles{
+@section Styles {
     <link rel="stylesheet" href="~/assets/plugins/datatables/datatables.bundle.css" />
 }
 
@@ -24,13 +24,13 @@
         </div>
         <!--begin::Content-->
         <div class="d-flex flex-column pe-0 pe-sm-10">
-            <h5 class="mb-1">Categories</h5>
+            <h5 class="mb-1">Authors</h5>
         </div>
         <!--end::Content-->
     </div>
     <div>
         <a href="javascript:;" class="btn btn-sm btn-primary d-flex align-items-center js-render-modal"
-           data-title="Add Category" data-url="/Categories/Create">
+           data-title="Add Author" data-url="/Authors/Create">
             <i class="bi bi-plus-square-dotted"></i>
             Add
         </a>
@@ -43,7 +43,7 @@
 
 
 <div class="card shadow-sm">
-    <partial name="_DataTablesCardHeader"/>
+    <partial name="_DataTablesCardHeader" />
     <div class="card-body pt-0">
         <div class="table-responsive">
             <table class="table table-row-dashed table-row-gray-300 gy-7 js-datatables" data-document-title="Categories">
@@ -57,9 +57,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var category in Model)
+                    @foreach (var author in Model)
                     {
-                        <partial name="_CategoryRow" model="@category" />
+                        <partial name="_AuthorRow" model="@author" />
                     }
                 </tbody>
             </table>
@@ -69,7 +69,7 @@
 
 <input type="hidden" name="__RequestVerificationToken" value="@antiforgery.GetAndStoreTokens(Context).RequestToken" />
 @* @Html.AntiForgeryToken() *@
-@section Plugins{
+@section Plugins {
     <script src="~/assets/plugins/datatables/datatables.bundle.js"></script>
 }
 
