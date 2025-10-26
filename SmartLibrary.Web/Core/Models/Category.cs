@@ -11,5 +11,7 @@ namespace SmartLibrary.Web.Core.Models
         [MaxLength(100)]
         public string Name { get; set; } = null!;
 
+        public virtual ICollection<BookCategory> BookCategories { get; set; } = new HashSet<BookCategory>();
+
     }
 }
