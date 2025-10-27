@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using SmartLibrary.Web.Consts;
 using SmartLibrary.Web.Core.Models;
 
@@ -9,6 +10,7 @@ namespace SmartLibrary.Web.Core.ViewModels
         public int Id { get; set; }
 
         [MaxLength(500, ErrorMessage = Errors.MaxLength)]
+        [Remote("AllowItem", null!, AdditionalFields = "Id, AuthorId", ErrorMessage = Errors.DuplicatedBook)]
         public string Title { get; set; } = null!;
 
 
@@ -19,9 +21,9 @@ namespace SmartLibrary.Web.Core.ViewModels
         [Display(Name = "Publishing Date")]
         public DateTime PublishingDate { get; set; } = DateTime.Now;
 
-        [Display(Name ="Image")]
-        public IFormFile? ImageUrl { get; set; }
+        public IFormFile? Image { get; set; }
 
+        public string? ImageUrl { get; set; }
 
         [MaxLength(50, ErrorMessage = Errors.MaxLength)]
         public string Hall { get; set; } = null!;
@@ -35,6 +37,7 @@ namespace SmartLibrary.Web.Core.ViewModels
 
 
         [Display(Name ="Author")]
+        [Remote("AllowItem", null!, AdditionalFields = "Id, Title", ErrorMessage = Errors.DuplicatedBook)]
         public int AuthorId { get; set; }
 
         public virtual IEnumerable<SelectListItem>? Authors { get; set; }

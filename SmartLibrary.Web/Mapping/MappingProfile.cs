@@ -28,7 +28,8 @@ namespace SmartLibrary.Web.Mapping
 
 
             //Book
-            CreateMap<BookFormViewModel, Book>().ReverseMap();
+            CreateMap<BookFormViewModel, Book>().ReverseMap()
+                .ForMember(dest => dest.Categories, opt => opt.Ignore());
         }
     }
 }

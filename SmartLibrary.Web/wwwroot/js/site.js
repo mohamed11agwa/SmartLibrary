@@ -151,6 +151,27 @@ var KTDatatables = function () {
 
 
 $(document).ready(function () {
+    //Tinymce
+    var options = { selector: ".js-tinymce", height: "412" };
+    var options = { selector: ".js-tinymce", height: "412" };
+
+    if (KTThemeMode.getMode() === "dark") {
+        options["skin"] = "oxide-dark";
+        options["content_css"] = "dark";
+    }
+
+    tinymce.init(options);
+
+    //Select2
+    $('.js-select2').select2();
+
+    //DateRangePIcker
+    $('.js-datepicker').daterangepicker({
+        singleDatePicker: true,
+        autoApply: true,
+        drops: 'up'
+    });
+
 
     //sweetAlert
     var message = $('#Message').text();
