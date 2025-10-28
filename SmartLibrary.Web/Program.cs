@@ -4,7 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Client;
 using SmartLibrary.Web.Data;
 using SmartLibrary.Web.Mapping;
+using SmartLibrary.Web.Settings;
 using System.Reflection;
+using UoN.ExpressiveAnnotations.NetCore.DependencyInjection;
 
 
 namespace SmartLibrary.Web
@@ -27,6 +29,8 @@ namespace SmartLibrary.Web
 
             builder.Services.AddAutoMapper(op => op.AddProfile<MappingProfile>());
 
+            builder.Services.AddExpressiveAnnotations();
+            builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection(nameof(CloudinarySettings)));
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SmartLibrary.Web.Consts;
 using SmartLibrary.Web.Core.Models;
+using UoN.ExpressiveAnnotations.NetCore.Attributes;
 
 namespace SmartLibrary.Web.Core.ViewModels
 {
@@ -19,6 +20,7 @@ namespace SmartLibrary.Web.Core.ViewModels
 
 
         [Display(Name = "Publishing Date")]
+        [AssertThat("PublishingDate <= Today()", ErrorMessage =Errors.NotAllowFuture)]
         public DateTime PublishingDate { get; set; } = DateTime.Now;
 
         public IFormFile? Image { get; set; }
@@ -31,7 +33,6 @@ namespace SmartLibrary.Web.Core.ViewModels
 
         [Display(Name ="Is available For Rental?")]
         public bool IsAvailableForRental { get; set; }
-
 
         public string Description { get; set; } = null!;
 

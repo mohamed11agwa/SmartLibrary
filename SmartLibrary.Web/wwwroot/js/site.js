@@ -169,7 +169,8 @@ $(document).ready(function () {
     $('.js-datepicker').daterangepicker({
         singleDatePicker: true,
         autoApply: true,
-        drops: 'up'
+        drops: 'up',
+        maxDate: new Date()
     });
 
 

@@ -7,6 +7,6 @@
         public const string DuplicatedBook = "Book with the same Title is already exists with the same author!";
         public const string NotAllowedExtensions = "Only .jpg, .jpeg, .png";
         public const string MaxSize = "File Can't Be more than 2MB";
-
+        public const string NotAllowFuture = "Date Can't be in the future";
     }
 }

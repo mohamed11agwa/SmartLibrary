@@ -30,6 +30,13 @@
         "js/select2.min.js",
         "css/select2.min.css"
       ]
+    },
+    {
+      "library": "expressive-annotations-validate@2.7.0",
+      "destination": "wwwroot/lib/expressive-annotations-validate/",
+      "files": [
+        "expressive.annotations.validate.min.js"
+      ]
     }
   ]
 }
