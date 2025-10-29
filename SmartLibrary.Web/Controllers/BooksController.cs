@@ -44,6 +44,17 @@ namespace SmartLibrary.Web.Controllers
         }
 
         [HttpGet]
+        public IActionResult Details(int id)
+        {
+            var book = _context.Books.Include(b => b.Author).Include(b => b.BookCategories).ThenInclude(c =>c.Category).SingleOrDefault(b => b.Id == id);
+            if (book is null)
+                return NotFound();  
+            var viewModel = _mapper.Map<BookViewModel>(book);
+            return View(viewModel);
+        }
+
+
+        [HttpGet]
         public IActionResult Create()
         {
             var viewModel = PopulateViewModel();
@@ -108,7 +119,7 @@ namespace SmartLibrary.Web.Controllers
             }
             _context.Add(book);
             _context.SaveChanges();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Details), new {id = book.Id});
         }
 
 
@@ -181,13 +192,6 @@ namespace SmartLibrary.Web.Controllers
                 image.Mutate(i => i.Resize(width: 200, height: (int)height));
                 image.Save(thumbnailpath);
 
-
-
-
-
-
-
-
                 //Host Image to Cloudinary
                 //using var stream = model.Image.OpenReadStream();
                 //var imageParams = new ImageUploadParams()
@@ -203,7 +207,11 @@ namespace SmartLibrary.Web.Controllers
 
             }
             else if((model.Image is null) && !string.IsNullOrEmpty(book.ImageUrl))
-               model.ImageUrl = book.ImageUrl;
+            {
+                model.ImageUrl = book.ImageUrl;
+                model.ImageThumbnailUrl = book.ImageThumbnailUrl;
+
+            }
 
             book = _mapper.Map(model, book);
             book.LastUpdatedOn = DateTime.Now;
@@ -217,7 +225,7 @@ namespace SmartLibrary.Web.Controllers
                 book.BookCategories.Add(new BookCategory { CategoryId = category });
             }
             _context.SaveChanges();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Details), new {id = book.Id});
         }
 
 
