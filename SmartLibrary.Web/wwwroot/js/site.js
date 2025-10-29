@@ -23,8 +23,11 @@ function ShowErrorMessage(message = "Something went wrong!") {
     });
 }
 
-function OnModalBegin() {
+function disableSubmitButtons() {
     $('body :submit').attr('disabled', 'disabled').attr('data-kt-indicator', 'on');
+}
+function OnModalBegin() {
+    disableSubmitButtons();
 }
 function OnModalSuccess(row) {
     ShowSuccessMessage();
@@ -151,19 +154,45 @@ var KTDatatables = function () {
 
 
 $(document).ready(function () {
+
+    //Disable submit buttons on form submit
+    $('form').on('submit', function () {
+        if ($('.js-tinymce').length > 0) {
+            $('.js-tinymce').each(function () {
+                var input = $(this);
+                var content = tinymce.get(input.attr('id')).getContent();
+                input.val(content);
+
+            });
+
+        } 
+
+        var isValid = $(this).valid();
+        if (isValid) disableSubmitButtons();
+
+    });
+
+
     //Tinymce
-    var options = { selector: ".js-tinymce", height: "412" };
-    var options = { selector: ".js-tinymce", height: "412" };
+    if ($('.js-tinymce').length > 0) {
+        var options = { selector: ".js-tinymce", height: "421" };
+        var options = { selector: ".js-tinymce", height: "421" };
 
-    if (KTThemeMode.getMode() === "dark") {
-        options["skin"] = "oxide-dark";
-        options["content_css"] = "dark";
-    }
+        if (KTThemeMode.getMode() === "dark") {
+            options["skin"] = "oxide-dark";
+            options["content_css"] = "dark";
+        }
+        tinymce.init(options);
 
-    tinymce.init(options);
+    } 
+
 
     //Select2
     $('.js-select2').select2();
+    $('.js-select2').on('select2:select', function (e) {
+        var select = $(this);
+        $('form').validate().element('#' + select.attr('id'));
+    });
 
     //DateRangePIcker
     $('.js-datepicker').daterangepicker({
