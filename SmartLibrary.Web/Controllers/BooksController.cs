@@ -10,7 +10,9 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using SmartLibrary.Web.Consts;
 using SmartLibrary.Web.Core.Models;
+using SmartLibrary.Web.Filters;
 using SmartLibrary.Web.Settings;
+using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 
 namespace SmartLibrary.Web.Controllers
@@ -42,6 +44,33 @@ namespace SmartLibrary.Web.Controllers
         {
             return View();
         }
+
+        [HttpPost]
+        public IActionResult GetBooks()
+        {
+            var skip = int.Parse(Request.Form["start"]);
+            var pageSize = int.Parse(Request.Form["length"]);
+
+            var sortColumnIndex = Request.Form["order[0][column]"];
+            var sortColumn = Request.Form[$"columns[{sortColumnIndex}][data]"];
+            var sortColumnDirection = Request.Form["order[0][dir]"];
+
+            var searchValue = Request.Form["search[value]"];
+
+            IQueryable<Book> books = _context.Books.Include(b => b.Author).Include(b => b.BookCategories)
+                .ThenInclude(c => c.Category);
+            if(!string.IsNullOrEmpty(searchValue))
+                books = books.Where(b => b.Title.Contains(searchValue) || b.Author!.Name.Contains(searchValue));
+            books = books.OrderBy($"{sortColumn} {sortColumnDirection}");
+            var data = books.Skip(skip).Take(pageSize).ToList();
+
+            var mappedData = _mapper.Map<IEnumerable<BookViewModel>>(data);
+            var recordsTotal = books.Count();
+
+            var jsonData = new {recordsFiltered = recordsTotal, recordsTotal, data = mappedData };
+            return Ok(jsonData);
+        }
+
 
         [HttpGet]
         public IActionResult Details(int id)
@@ -235,6 +264,19 @@ namespace SmartLibrary.Web.Controllers
             var book = _context.Books.SingleOrDefault(b => b.Title == model.Title && b.AuthorId == model.AuthorId);
             var isAllowed = book is null || book.Id.Equals(model.Id);
             return Json(isAllowed);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ToggleStatus(int id)
+        {
+            var book = _context.Books.Find(id);
+            if (book is null)
+                return NotFound();
+            book.IsDeleted = !book.IsDeleted;
+            book.LastUpdatedOn = DateTime.Now;
+            _context.SaveChanges();
+            return Ok();
         }
 
         public string GetThumbnailUrl(string url)
