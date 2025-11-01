@@ -14,7 +14,8 @@ namespace SmartLibrary.Web.Core.ViewModels
         public bool IsAvailableForRental { get; set; }
         public string Description { get; set; } = null!;
         public string Author { get; set; } = null!;
-        public virtual IEnumerable<string> Categories { get; set; } = null!;
+        public virtual IEnumerable<string> Categories { get; set; } =  null!;
+        public IEnumerable<BookCopyViewModel> BookCopies { get; set; } = null!;
         public bool IsDeleted { get; set; }
         public DateTime CreatedOn { get; set; } = DateTime.Now;
     }

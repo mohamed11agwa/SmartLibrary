@@ -34,5 +34,7 @@ namespace SmartLibrary.Web.Core.Models
         public virtual Author? Author { get; set; }
 
         public virtual ICollection<BookCategory> BookCategories { get; set; } = new HashSet<BookCategory>();
+
+        public ICollection<BookCopy> Copies { get; set; } = new List<BookCopy>();
     }
 }

@@ -41,7 +41,7 @@ namespace SmartLibrary.Web.Controllers
             _context.Add(author);
             _context.SaveChanges();
             var viewModel = _mapper.Map<AuthorViewModel>(author);
-            return PartialView("_AuthorRow", viewModel); ;
+            return PartialView("_AuthorRow", viewModel);
         }
 
         [HttpGet]

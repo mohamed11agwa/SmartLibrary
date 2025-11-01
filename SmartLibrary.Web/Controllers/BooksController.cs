@@ -75,13 +75,14 @@ namespace SmartLibrary.Web.Controllers
         [HttpGet]
         public IActionResult Details(int id)
         {
-            var book = _context.Books.Include(b => b.Author).Include(b => b.BookCategories).ThenInclude(c =>c.Category).SingleOrDefault(b => b.Id == id);
+            var book = _context.Books.Include(b => b.Author).Include(b => b.Copies).Include(b => b.BookCategories)
+                .ThenInclude(c => c.Category).SingleOrDefault(b => b.Id == id);
             if (book is null)
-                return NotFound();  
+                return NotFound();
+
             var viewModel = _mapper.Map<BookViewModel>(book);
             return View(viewModel);
         }
-
 
         [HttpGet]
         public IActionResult Create()
