@@ -22,6 +22,9 @@ namespace SmartLibrary.Web.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.HasSequence<int>("SerialNumber", "shared")
+                .StartsAt(1000001L);
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -333,6 +336,44 @@ namespace SmartLibrary.Web.Data.Migrations
                     b.ToTable("BookCategories");
                 });
 
+            modelBuilder.Entity("SmartLibrary.Web.Core.Models.BookCopy", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BookId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("EditionNumber")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsAvailableForRental")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastUpdatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SerialNumber")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValueSql("NEXT VALUE FOR shared.SerialNumber");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookId");
+
+                    b.ToTable("BookCopies");
+                });
+
             modelBuilder.Entity("SmartLibrary.Web.Core.Models.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -444,9 +485,22 @@ namespace SmartLibrary.Web.Data.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("SmartLibrary.Web.Core.Models.BookCopy", b =>
+                {
+                    b.HasOne("SmartLibrary.Web.Core.Models.Book", "Book")
+                        .WithMany("Copies")
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+                });
+
             modelBuilder.Entity("SmartLibrary.Web.Core.Models.Book", b =>
                 {
                     b.Navigation("BookCategories");
+
+                    b.Navigation("Copies");
                 });
 
             modelBuilder.Entity("SmartLibrary.Web.Core.Models.Category", b =>
