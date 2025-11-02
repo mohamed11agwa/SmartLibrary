@@ -1,0 +1,80 @@
+﻿@model IEnumerable<UserViewModel>
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery antiforgery
+@{
+    ViewData["Title"] = "Users";
+}
+@section Styles{
+    <link rel="stylesheet" href="~/assets/plugins/datatables/datatables.bundle.css" />
+}
+
+<div class="alert bg-light-primary border border-primary border-3 border-dashed d-flex justify-content-between w-100 p-5 mb-10">
+    <div class="d-flex align-items-center">
+        <div class="symbol symbol-40px me-4">
+            <div class="symbol-label fs-2 fw-semibold text-success">
+                <!--begin::Svg Icon | path: icons/duotune/general/gen002.svg-->
+                <span class="svg-icon svg-icon-2 svg-icon-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                        <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+                        <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
+                    </svg>
+
+                </span>
+                <!--end::Svg Icon-->
+            </div>
+        </div>
+        <!--begin::Content-->
+        <div class="d-flex flex-column pe-0 pe-sm-10">
+            <h5 class="mb-1">Users</h5>
+        </div>
+        <!--end::Content-->
+    </div>
+    <div>
+        <a href="javascript:;" class="btn btn-sm btn-primary d-flex align-items-center js-render-modal"
+           data-title="Add User" data-url="/Users/Create">
+            <i class="bi bi-plus-square-dotted"></i>
+            Add
+        </a>
+    </div>
+</div>
+
+
+
+
+
+
+<div class="card shadow-sm">
+    <partial name="_DataTablesCardHeader"/>
+    <div class="card-body pt-0">
+        <div class="table-responsive">
+            <table class="table table-row-dashed table-row-gray-300 gy-2 align-middle js-datatables" data-document-title="Users">
+                <thead>
+                    <tr class="fw-bold fs-6 text-gray-800">
+                        <th>Full Name</th>
+                        <th>UserName</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Created On</th>
+                        <th>Last Updated On</th>
+                        <th class="text-center js-no-export">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <partial name="_UserRow" model="@user" />
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" name="__RequestVerificationToken" value="@antiforgery.GetAndStoreTokens(Context).RequestToken" />
+@* @Html.AntiForgeryToken() *@
+@section Plugins{
+    <script src="~/assets/plugins/datatables/datatables.bundle.js"></script>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

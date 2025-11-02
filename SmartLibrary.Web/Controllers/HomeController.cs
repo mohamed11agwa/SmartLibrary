@@ -1,9 +1,12 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartLibrary.Web.Core.ViewModels;
 
 namespace SmartLibrary.Web.Controllers
 {
+    [Authorize(Roles ="Admin")]
+
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -17,7 +20,6 @@ namespace SmartLibrary.Web.Controllers
         {
             return View();
         }
-
         public IActionResult Privacy()
         {
             return View();

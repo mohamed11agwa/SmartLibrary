@@ -42,6 +42,12 @@ namespace SmartLibrary.Web.Mapping
                 .ForMember(dest => dest.BookTitle, opt => opt.MapFrom(src => src.Book!.Title));
 
             CreateMap<BookCopy, BookCopyFormViewModel>().ReverseMap();
+
+
+
+            //User
+            CreateMap<ApplicationUser, UserViewModel>();
+
         }
     }
 }

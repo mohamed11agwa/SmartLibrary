@@ -54,6 +54,18 @@ function OnModalComplete() {
     $('body :submit').removeAttr('disabled').removeAttr('data-kt-indicator');
 }
 
+
+function applySelect2() {
+    //Select2
+    $('.js-select2').select2();
+    $('.js-select2').on('select2:select', function (e) {
+        var select = $(this);
+        $('form').not('#SignOut').validate().element('#' + select.attr('id'));
+    });
+}
+
+
+
 //Datatable
 var headers = $('th');
 $.each(headers, function (i) {
@@ -156,7 +168,7 @@ var KTDatatables = function () {
 $(document).ready(function () {
 
     //Disable submit buttons on form submit
-    $('form').on('submit', function () {
+    $('form').not('#SignOut').on('submit', function () {
         if ($('.js-tinymce').length > 0) {
             $('.js-tinymce').each(function () {
                 var input = $(this);
@@ -188,11 +200,7 @@ $(document).ready(function () {
 
 
     //Select2
-    $('.js-select2').select2();
-    $('.js-select2').on('select2:select', function (e) {
-        var select = $(this);
-        $('form').validate().element('#' + select.attr('id'));
-    });
+    applySelect2();
 
     //DateRangePIcker
     $('.js-datepicker').daterangepicker({
@@ -229,6 +237,7 @@ $(document).ready(function () {
                 //console.log(form);
                 modal.find('.modal-body').html(form);
                 $.validator.unobtrusive.parse(modal);
+                applySelect2();
             },
             error: function () {
                 ShowErrorMessage();
@@ -291,5 +300,11 @@ $(document).ready(function () {
 
     });
 
+
+
+    //Handle SignOut
+    $('.js-signout').on('click', function () {
+        $('#SignOut').submit();
+    });
 
 });
