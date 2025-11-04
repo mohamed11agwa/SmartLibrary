@@ -1,11 +1,15 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SmartLibrary.Web.Consts;
 using SmartLibrary.Web.Core.Models;
 using SmartLibrary.Web.Filters;
+using System.Security.Claims;
 
 namespace SmartLibrary.Web.Controllers
-{ 
+{
+    [Authorize(Roles = AppRoles.Archive)]
     public class AuthorsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -38,6 +42,7 @@ namespace SmartLibrary.Web.Controllers
             if(!ModelState.IsValid)
                 return View("_Form", model);
             var author = _mapper.Map<Author>(model);
+            author.CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             _context.Add(author);
             _context.SaveChanges();
             var viewModel = _mapper.Map<AuthorViewModel>(author);
@@ -68,6 +73,7 @@ namespace SmartLibrary.Web.Controllers
                 return NotFound();
 
             author = _mapper.Map(model, author);
+            author.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             author.LastUpdatedOn = DateTime.Now;
 
             _context.SaveChanges();
@@ -84,6 +90,7 @@ namespace SmartLibrary.Web.Controllers
             if (author is null)
                 return NotFound();
             author.IsDeleted = !author.IsDeleted;
+            author.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             author.LastUpdatedOn = DateTime.Now;
             _context.SaveChanges();
             return Ok(author.LastUpdatedOn.ToString());
