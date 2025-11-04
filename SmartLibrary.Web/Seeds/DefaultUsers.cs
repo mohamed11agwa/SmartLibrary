@@ -10,7 +10,7 @@ namespace SmartLibrary.Web.Seeds
         {
             ApplicationUser admin = new ApplicationUser()
             {
-                UserName = "admin",
+                UserName = "admin@smartlibrary.com",
                 Email = "admin@smartlibrary.com",
                 FullName = "Admin",
                 EmailConfirmed = true
@@ -22,8 +22,6 @@ namespace SmartLibrary.Web.Seeds
                 await userManager.CreateAsync(admin, "Admin@123");
                 await userManager.AddToRoleAsync(admin, AppRoles.Admin);
             }
-
-
 
         }
 

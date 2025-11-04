@@ -31,6 +31,13 @@ namespace SmartLibrary.Web
                 .AddDefaultTokenProviders();
 
 
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                // Default Password settings.
+                options.Password.RequiredLength = 8;
+                options.User.RequireUniqueEmail = true;
+            });
+
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddAutoMapper(op => op.AddProfile<MappingProfile>());

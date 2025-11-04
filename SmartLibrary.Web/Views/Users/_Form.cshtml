@@ -11,7 +11,7 @@
     }
     <div class="mb-5">
         <div class="form-floating mb-2">
-            <input type="text" class="form-control" placeholder="" asp-for="FullName" />
+            <input type="text" class="form-control form-control-solid" placeholder="" asp-for="FullName" />
             <label asp-for="FullName"></label>
         </div>
         <span asp-validation-for="FullName" class="text-danger d-block"></span>
@@ -19,7 +19,7 @@
 
      <div class="mb-5">
         <div class="form-floating mb-2">
-            <input type="text" class="form-control" placeholder="" asp-for="UserName" />
+            <input type="text" class="form-control form-control-solid" placeholder="" asp-for="UserName" />
             <label asp-for="UserName"></label>
         </div>
         <span asp-validation-for="UserName" class="text-danger d-block"></span>
@@ -27,7 +27,7 @@
 
     <div class="mb-5">
         <div class="form-floating mb-2">
-            <input type="email" class="form-control" placeholder="" asp-for="Email" />
+            <input type="email" class="form-control form-control-solid" placeholder="" asp-for="Email" />
             <label asp-for="Email"></label>
         </div>
         <span asp-validation-for="Email" class="text-danger d-block"></span>
@@ -41,24 +41,25 @@
         </div>
         <span asp-validation-for="SelectedRoles" class="text-danger d-block"></span>
     </div>
-
-    <div class="mb-5">
-        <div class="form-floating mb-2">
-            <input type="password" class="form-control" placeholder="" asp-for="Password" />
-            <label asp-for="Password"></label>
+      @if (string.IsNullOrEmpty(Model?.Id))
+    {
+        <div class="mb-5">
+            <div class="form-floating mb-2">
+                <input type="password" class="form-control form-control-solid" placeholder="" asp-for="Password" />
+                <label asp-for="Password"></label>
+            </div>
+            <span asp-validation-for="Password" class="text-danger d-block"></span>
         </div>
-        <span asp-validation-for="Password" class="text-danger d-block"></span>
-    </div>
 
-    <div class="mb-5">
-        <div class="form-floating mb-2">
-            <input type="email" class="form-control" placeholder="" asp-for="ConfirmPassword" />
-            <label asp-for="ConfirmPassword"></label>
+        <div class="mb-5">
+            <div class="form-floating mb-2">
+                <input type="password" class="form-control form-control-solid" placeholder="" asp-for="ConfirmPassword" />
+                <label asp-for="ConfirmPassword"></label>
+            </div>
+            <span asp-validation-for="ConfirmPassword" class="text-danger d-block"></span>
         </div>
-        <span asp-validation-for="ConfirmPassword" class="text-danger d-block"></span>
-    </div>
-
-
+   
+    }
     <partial name="_ModalFooter" />
 </form>
 

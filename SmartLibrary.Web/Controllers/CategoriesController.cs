@@ -1,11 +1,15 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SmartLibrary.Web.Consts;
 using SmartLibrary.Web.Core.Models;
 using SmartLibrary.Web.Filters;
+using System.Security.Claims;
 
 namespace SmartLibrary.Web.Controllers
 {
+    [Authorize(Roles = AppRoles.Archive)]
     public class CategoriesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -40,6 +44,7 @@ namespace SmartLibrary.Web.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
             var category = _mapper.Map<Category>(model);
+            category.CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             _context.Add(category);
             _context.SaveChanges();
             //Send Alerts Controllers to Views.
@@ -72,6 +77,7 @@ namespace SmartLibrary.Web.Controllers
             if (category is null)
                 return NotFound();
             category = _mapper.Map(model, category);
+            category.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             category.LastUpdatedOn = DateTime.Now;
             _context.SaveChanges();
             var viewModel = _mapper.Map<CategoryViewModel>(category);
@@ -89,6 +95,7 @@ namespace SmartLibrary.Web.Controllers
             if (category is null)
                 return NotFound();
             category.IsDeleted = !category.IsDeleted;
+            category.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             category.LastUpdatedOn = DateTime.Now;
             _context.SaveChanges();
             return Ok(category.LastUpdatedOn.ToString());

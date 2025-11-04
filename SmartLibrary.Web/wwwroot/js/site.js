@@ -13,10 +13,11 @@ function ShowSuccessMessage(message = "Saved Successfully") {
     });
 }
 function ShowErrorMessage(message = "Something went wrong!") {
+    //console.log(message);
     Swal.fire({
         icon: "error",
         title: "Oops...",
-        text: message,
+        text: message.responseText != undefined ? message.responseText : message,
         customClass: {
             confirmButton: "btn btn-primary"
         }

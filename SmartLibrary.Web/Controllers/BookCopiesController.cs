@@ -1,12 +1,15 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SmartLibrary.Web.Consts;
 using SmartLibrary.Web.Core.Models;
 using SmartLibrary.Web.Filters;
+using System.Security.Claims;
 
 namespace SmartLibrary.Web.Controllers
 {
-
+    [Authorize(Roles = AppRoles.Archive)]
     public class BookCopiesController : Controller
     {
         public readonly ApplicationDbContext _context;
@@ -52,7 +55,8 @@ namespace SmartLibrary.Web.Controllers
                 BookId = model.BookId,
                 EditionNumber = model.EditionNumber,
                 IsAvailableForRental = book.IsAvailableForRental ? model.IsAvailableForRental : false ,
-                
+                CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value,
+
             };
             _context.Add(copy);
             _context.SaveChanges();
@@ -85,6 +89,7 @@ namespace SmartLibrary.Web.Controllers
 
             copy.EditionNumber = model.EditionNumber;
             copy.IsAvailableForRental = copy.Book!.IsAvailableForRental ? model.IsAvailableForRental : false;
+            copy.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             copy.LastUpdatedOn = DateTime.Now;
 
             _context.SaveChanges();
@@ -105,6 +110,7 @@ namespace SmartLibrary.Web.Controllers
             if (copy is null)
                 return NotFound();
             copy.IsDeleted = !copy.IsDeleted;
+            copy.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             copy.LastUpdatedOn = DateTime.Now;
             _context.SaveChanges();
             return Ok();

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +14,12 @@ using SmartLibrary.Web.Core.Models;
 using SmartLibrary.Web.Filters;
 using SmartLibrary.Web.Settings;
 using System.Linq.Dynamic.Core;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace SmartLibrary.Web.Controllers
 {
+    [Authorize(Roles = AppRoles.Archive)]
     public class BooksController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -143,6 +146,7 @@ namespace SmartLibrary.Web.Controllers
                 //book.ImageThumbnailUrl = GetThumbnailUrl(book.ImageUrl);
                 //book.ImagePublicId = result.PublicId;
             }
+            book.CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             foreach (var category in model.SelectedCategories)
             {
                 book.BookCategories.Add(new BookCategory { CategoryId = category });
@@ -177,7 +181,8 @@ namespace SmartLibrary.Web.Controllers
                 model = PopulateViewModel(model);
                 return View("Form", model);
             }
-            var book = _context.Books.Include(b => b.BookCategories).SingleOrDefault(b=> b.Id == model.Id);
+            var book = _context.Books.Include(b => b.BookCategories)
+                .Include(b => b.Copies).SingleOrDefault(b=> b.Id == model.Id);
             if (book is null)
                 return NotFound();
 
@@ -245,7 +250,7 @@ namespace SmartLibrary.Web.Controllers
 
             book = _mapper.Map(model, book);
             book.LastUpdatedOn = DateTime.Now;
-
+            book.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             //book.ImageThumbnailUrl = GetThumbnailUrl(book.ImageUrl!);
             //book.ImagePublicId = ImagePublicId;
 
@@ -253,6 +258,11 @@ namespace SmartLibrary.Web.Controllers
             foreach (var category in model.SelectedCategories)
             {
                 book.BookCategories.Add(new BookCategory { CategoryId = category });
+            }
+            if (!model.IsAvailableForRental)
+            {
+                foreach (var copy in book.Copies)
+                    copy.IsAvailableForRental = false;
             }
             _context.SaveChanges();
             return RedirectToAction(nameof(Details), new {id = book.Id});
@@ -275,6 +285,7 @@ namespace SmartLibrary.Web.Controllers
             if (book is null)
                 return NotFound();
             book.IsDeleted = !book.IsDeleted;
+            book.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             book.LastUpdatedOn = DateTime.Now;
             _context.SaveChanges();
             return Ok();
