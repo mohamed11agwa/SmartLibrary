@@ -1,4 +1,5 @@
-﻿var UpdatedRow;
+﻿
+var UpdatedRow;
 var table;
 var datatable;
 var exportedCols = [];
@@ -295,12 +296,49 @@ $(document).ready(function () {
             }
         });
 
+    });
+
+
+    //Handle Unlock 
+    $('body').delegate('.js-confirm', 'click', function () {       
+        var btn = $(this);
+        bootbox.confirm({
+            message: btn.data('message'),
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-secondary'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                    $.post({
+                        url: btn.data('url'),
+                        data: {
+                            '__RequestVerificationToken': $('input[name = "__RequestVerificationToken"]').val()
+                        },
+                        success: function () {
+                            ShowSuccessMessage();
+
+                        },
+                        error: function () {
+                            ShowErrorMessage();
+
+                        }
+                    });
+                }
+            }
+        });
+
 
 
 
 
     });
-
 
 
     //Handle SignOut

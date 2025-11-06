@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Client;
 using SmartLibrary.Web.Core.Models;
 using SmartLibrary.Web.Data;
+using SmartLibrary.Web.Helpers;
 using SmartLibrary.Web.Mapping;
 using SmartLibrary.Web.Seeds;
+using SmartLibrary.Web.Services;
 using SmartLibrary.Web.Settings;
 using System.Reflection;
 using UoN.ExpressiveAnnotations.NetCore.DependencyInjection;
@@ -38,12 +41,22 @@ namespace SmartLibrary.Web
                 options.User.RequireUniqueEmail = true;
             });
 
+            builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
+
+            builder.Services.AddTransient<IImageService, ImageService>();
+            builder.Services.AddTransient<IEmailSender, EmailSender>();
+            builder.Services.AddTransient<IEmailBodyBuilder, EmailBodyBuilder>();
+
+            builder.Services.Configure<SecurityStampValidatorOptions>(opt => opt.ValidationInterval =TimeSpan.Zero);
+
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddAutoMapper(op => op.AddProfile<MappingProfile>());
 
             builder.Services.AddExpressiveAnnotations();
             builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection(nameof(CloudinarySettings)));
+            builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
+            
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

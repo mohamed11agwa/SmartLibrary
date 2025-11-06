@@ -1,13 +1,18 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using SmartLibrary.Web.Consts;
 using SmartLibrary.Web.Core.Models;
 using SmartLibrary.Web.Filters;
+using SmartLibrary.Web.Services;
 using System.Security.Claims;
+using System.Text;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 
 namespace SmartLibrary.Web.Controllers
@@ -18,11 +23,17 @@ namespace SmartLibrary.Web.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
         private readonly RoleManager<IdentityRole> _roleManager;
-        public UsersController(UserManager<ApplicationUser> userManager, IMapper mapper, RoleManager<IdentityRole> roleManager)
+        private readonly IEmailSender _emailSender;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IEmailBodyBuilder _emailBodyBuilder;
+        public UsersController(UserManager<ApplicationUser> userManager, IMapper mapper, RoleManager<IdentityRole> roleManager, IEmailSender emailSender, IWebHostEnvironment webHostEnvironment, IEmailBodyBuilder emailBodyBuilder)
         {
             _userManager = userManager;
             _mapper = mapper;
             _roleManager = roleManager;
+            _emailSender = emailSender;
+            _webHostEnvironment = webHostEnvironment;
+            _emailBodyBuilder = emailBodyBuilder;
         }
 
         public async Task<IActionResult> Index()
@@ -66,7 +77,28 @@ namespace SmartLibrary.Web.Controllers
             IdentityResult result = await _userManager.CreateAsync(user, model.Password!);
             if (result.Succeeded)
             {
+
                 await _userManager.AddToRolesAsync(user, model.SelectedRoles);
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                var callbackUrl = Url.Page(
+                    "/Account/ConfirmEmail",
+                    pageHandler: null,
+                    values: new { area = "Identity", userId = user.Id, code = code},
+                    protocol: Request.Scheme);
+
+                var body = _emailBodyBuilder.GetEmailBody(
+                    "https://res.cloudinary.com/devagwa/image/upload/v1762438094/icon-positive-vote-1_rdexez_lxhwam_t0tvln.png",
+                    $"Hey {user.FullName}, thanks For Joining Us!",
+                    "Please Confirm Your Eamil",
+                    $"{HtmlEncoder.Default.Encode(callbackUrl!)}",
+                    "Activate Account!");
+
+                await _emailSender.SendEmailAsync(user.Email, "Confirm your email", body);
+
+                
+
+
                 var userViewModel = _mapper.Map<UserViewModel>(user);
                 return PartialView("_UserRow", userViewModel);
             }
@@ -122,6 +154,8 @@ namespace SmartLibrary.Web.Controllers
                     await _userManager.RemoveFromRolesAsync(user, currentRoles);
                     await _userManager.AddToRolesAsync(user, model.SelectedRoles);
                 }
+                await _userManager.UpdateSecurityStampAsync(user);
+
                 var viewModel = _mapper.Map<UserViewModel>(user);
                 return PartialView("_UserRow", viewModel);
             }
@@ -184,9 +218,27 @@ namespace SmartLibrary.Web.Controllers
             user.LastUpdatedOn = DateTime.Now;
 
             await _userManager.UpdateAsync(user);
+            if (user.IsDeleted)
+                await _userManager.UpdateSecurityStampAsync(user);
+            
             return Ok(user.LastUpdatedOn.ToString());
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Unlock(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user is null)
+                return NotFound();
+
+            var isLocked = await _userManager.IsLockedOutAsync(user);
+            if(isLocked)
+            {
+                await _userManager.SetLockoutEndDateAsync(user, null);
+            }
+            return Ok();
+        }
 
         public async Task<IActionResult> AllowUserName(UserFormViewModel model)
         {
