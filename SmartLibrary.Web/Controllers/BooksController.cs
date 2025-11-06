@@ -12,6 +12,7 @@ using SixLabors.ImageSharp.Processing;
 using SmartLibrary.Web.Consts;
 using SmartLibrary.Web.Core.Models;
 using SmartLibrary.Web.Filters;
+using SmartLibrary.Web.Services;
 using SmartLibrary.Web.Settings;
 using System.Linq.Dynamic.Core;
 using System.Security.Claims;
@@ -28,8 +29,9 @@ namespace SmartLibrary.Web.Controllers
         private int _maxAllowedSize = 2097152;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly Cloudinary _cloudinary;
+        private readonly IImageService _imageService;
         public BooksController(ApplicationDbContext context, IMapper mapper, IWebHostEnvironment webHostEnvironment,
-                                                                            IOptions<CloudinarySettings> cloudinary)
+                                                                            IOptions<CloudinarySettings> cloudinary, IImageService imageService)
         {
             _context = context;
             _mapper = mapper;
@@ -41,6 +43,7 @@ namespace SmartLibrary.Web.Controllers
                 ApiSecret = cloudinary.Value.ApiSecret
             };
             _cloudinary = new Cloudinary(account);
+            _imageService = imageService;
         }
 
         public IActionResult Index()
@@ -108,30 +111,18 @@ namespace SmartLibrary.Web.Controllers
             if(model.Image is not null)
             {
                 var extension = Path.GetExtension(model.Image.FileName);
-                if (!_allowedExtensions.Contains(extension))
-                {
-                    ModelState.AddModelError(nameof(model.Image), Errors.NotAllowedExtensions);
-                    return View("Form", PopulateViewModel(model));
-                }
-                if (model.Image.Length > _maxAllowedSize)
-                {
-                    ModelState.AddModelError(nameof(model.Image), Errors.MaxSize);
-                    return View("Form", PopulateViewModel(model));
-                }
                 var imageName = $"{Guid.NewGuid()}{extension}";
-                var path = Path.Combine($"{_webHostEnvironment.WebRootPath}/images/books", imageName);
-                var thumbnailpath = Path.Combine($"{_webHostEnvironment.WebRootPath}/images/books/thumb", imageName);
-                
-                using var stream = System.IO.File.Create(path);
-                await model.Image.CopyToAsync(stream);
+
+                var result = await _imageService.UploadAsync(model.Image, imageName, "/images/books", hasThumbnail: true);
+                if (!result.isUploaded)
+                {
+                    ModelState.AddModelError(nameof(model.Image), result.errorMessage!);
+                    return View("Form", PopulateViewModel(model));
+                   
+                }
                 book.ImageUrl = $"/images/books/{imageName}";
                 book.ImageThumbnailUrl = $"/images/books/thumb/{imageName}";
 
-                using var image = Image.Load(model.Image.OpenReadStream());
-                var ratio = (float)image.Width / 200;
-                var height = image.Height / ratio;
-                image.Mutate(i => i.Resize(width:200, height:(int)height));
-                image.Save(thumbnailpath);
 
                 //Host Image to Cloudinary
                 //using var stream = model.Image.OpenReadStream();
@@ -191,41 +182,22 @@ namespace SmartLibrary.Web.Controllers
             {
                 if (!string.IsNullOrEmpty(book.ImageUrl))
                 {
-                    var oldImagePath = $"{_webHostEnvironment.WebRootPath}{book.ImageUrl}";
-                    var oldImageThumbPath = $"{_webHostEnvironment.WebRootPath}{book.ImageThumbnailUrl}";
-                    if (System.IO.File.Exists(oldImagePath))
-                        System.IO.File.Delete(oldImagePath);
-
-                    if (System.IO.File.Exists(oldImageThumbPath))
-                        System.IO.File.Delete(oldImageThumbPath);
+                    _imageService.Delete(book.ImageUrl, book.ImageThumbnailUrl);
 
                     //await _cloudinary.DeleteResourcesAsync(book.ImagePublicId);
                 }
                 var extension = Path.GetExtension(model.Image.FileName);
-                if (!_allowedExtensions.Contains(extension))
-                {
-                    ModelState.AddModelError(nameof(model.Image), Errors.NotAllowedExtensions);
-                    return View("Form", PopulateViewModel(model));
-                }
-                if (model.Image.Length > _maxAllowedSize)
-                {
-                    ModelState.AddModelError(nameof(model.Image), Errors.MaxSize);
-                    return View("Form", PopulateViewModel(model));
-                }
                 var imageName = $"{Guid.NewGuid()}{extension}";
-                var path = Path.Combine($"{_webHostEnvironment.WebRootPath}/images/books", imageName);
-                var thumbnailpath = Path.Combine($"{_webHostEnvironment.WebRootPath}/images/books/thumb", imageName);
 
-                using var stream = System.IO.File.Create(path);
-                await model.Image.CopyToAsync(stream);
+                var result = await _imageService.UploadAsync(model.Image, imageName, "/images/books", hasThumbnail: true);
+                if (!result.isUploaded)
+                {
+                    ModelState.AddModelError(nameof(model.Image), result.errorMessage!);
+                    return View("Form", PopulateViewModel(model));
+                    
+                }
                 model.ImageUrl = $"/images/books/{imageName}";
                 model.ImageThumbnailUrl = $"/images/books/thumb/{imageName}";
-
-                using var image = Image.Load(model.Image.OpenReadStream());
-                var ratio = (float)image.Width / 200;
-                var height = image.Height / ratio;
-                image.Mutate(i => i.Resize(width: 200, height: (int)height));
-                image.Save(thumbnailpath);
 
                 //Host Image to Cloudinary
                 //using var stream = model.Image.OpenReadStream();

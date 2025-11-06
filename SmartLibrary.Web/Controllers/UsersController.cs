@@ -122,6 +122,8 @@ namespace SmartLibrary.Web.Controllers
                     await _userManager.RemoveFromRolesAsync(user, currentRoles);
                     await _userManager.AddToRolesAsync(user, model.SelectedRoles);
                 }
+                await _userManager.UpdateSecurityStampAsync(user);
+
                 var viewModel = _mapper.Map<UserViewModel>(user);
                 return PartialView("_UserRow", viewModel);
             }
@@ -184,9 +186,27 @@ namespace SmartLibrary.Web.Controllers
             user.LastUpdatedOn = DateTime.Now;
 
             await _userManager.UpdateAsync(user);
+            if (user.IsDeleted)
+                await _userManager.UpdateSecurityStampAsync(user);
+            
             return Ok(user.LastUpdatedOn.ToString());
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Unlock(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user is null)
+                return NotFound();
+
+            var isLocked = await _userManager.IsLockedOutAsync(user);
+            if(isLocked)
+            {
+                await _userManager.SetLockoutEndDateAsync(user, null);
+            }
+            return Ok();
+        }
 
         public async Task<IActionResult> AllowUserName(UserFormViewModel model)
         {

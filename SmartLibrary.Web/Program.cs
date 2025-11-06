@@ -4,8 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Client;
 using SmartLibrary.Web.Core.Models;
 using SmartLibrary.Web.Data;
+using SmartLibrary.Web.Helpers;
 using SmartLibrary.Web.Mapping;
 using SmartLibrary.Web.Seeds;
+using SmartLibrary.Web.Services;
 using SmartLibrary.Web.Settings;
 using System.Reflection;
 using UoN.ExpressiveAnnotations.NetCore.DependencyInjection;
@@ -37,6 +39,12 @@ namespace SmartLibrary.Web
                 options.Password.RequiredLength = 8;
                 options.User.RequireUniqueEmail = true;
             });
+
+            builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
+
+            builder.Services.AddTransient<IImageService, ImageService>();
+
+            builder.Services.Configure<SecurityStampValidatorOptions>(opt => opt.ValidationInterval =TimeSpan.Zero);
 
             builder.Services.AddControllersWithViews();
 
