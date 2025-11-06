@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Client;
@@ -43,6 +44,8 @@ namespace SmartLibrary.Web
             builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 
             builder.Services.AddTransient<IImageService, ImageService>();
+            builder.Services.AddTransient<IEmailSender, EmailSender>();
+            builder.Services.AddTransient<IEmailBodyBuilder, EmailBodyBuilder>();
 
             builder.Services.Configure<SecurityStampValidatorOptions>(opt => opt.ValidationInterval =TimeSpan.Zero);
 
@@ -52,6 +55,8 @@ namespace SmartLibrary.Web
 
             builder.Services.AddExpressiveAnnotations();
             builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection(nameof(CloudinarySettings)));
+            builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
+            
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using SmartLibrary.Web.Core.Models;
+using SmartLibrary.Web.Services;
 
 namespace SmartLibrary.Web.Areas.Identity.Pages.Account.Manage
 {
@@ -21,15 +22,18 @@ namespace SmartLibrary.Web.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
+        private readonly IEmailBodyBuilder _emailBodyBuilder;
 
         public EmailModel(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IEmailBodyBuilder emailBodyBuilder)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
+            _emailBodyBuilder = emailBodyBuilder;
         }
 
         /// <summary>
@@ -160,10 +164,17 @@ namespace SmartLibrary.Web.Areas.Identity.Pages.Account.Manage
                 pageHandler: null,
                 values: new { area = "Identity", userId = userId, code = code },
                 protocol: Request.Scheme);
-            await _emailSender.SendEmailAsync(
-                email,
-                "Confirm your email",
-                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+
+            var body = _emailBodyBuilder.GetEmailBody(
+            "https://res.cloudinary.com/devagwa/image/upload/v1762456810/icon-positive-vote-2_jcxdww_a0gaxz.png",
+                    $"Hey {user.FullName},",
+                    "please Confirm Your Email",
+                    $"{HtmlEncoder.Default.Encode(callbackUrl!)}",
+                    "Confirm Email"
+            );
+
+            await _emailSender.SendEmailAsync(email, "Confirm your email", body);
 
             StatusMessage = "Verification email sent. Please check your email.";
             return RedirectToPage();

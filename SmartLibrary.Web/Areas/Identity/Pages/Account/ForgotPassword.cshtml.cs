@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using SmartLibrary.Web.Core.Models;
+using SmartLibrary.Web.Services;
 
 namespace SmartLibrary.Web.Areas.Identity.Pages.Account
 {
@@ -21,11 +22,13 @@ namespace SmartLibrary.Web.Areas.Identity.Pages.Account
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailSender _emailSender;
+        private readonly IEmailBodyBuilder _emailBodyBuilder;
 
-        public ForgotPasswordModel(UserManager<ApplicationUser> userManager, IEmailSender emailSender)
+        public ForgotPasswordModel(UserManager<ApplicationUser> userManager, IEmailSender emailSender, IEmailBodyBuilder emailBodyBuilder)
         {
             _userManager = userManager;
             _emailSender = emailSender;
+            _emailBodyBuilder = emailBodyBuilder;
         }
 
         /// <summary>
@@ -71,10 +74,18 @@ namespace SmartLibrary.Web.Areas.Identity.Pages.Account
                     values: new { area = "Identity", code },
                     protocol: Request.Scheme);
 
-                await _emailSender.SendEmailAsync(
-                    Input.Email,
-                    "Reset Password",
-                    $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+
+                var body = _emailBodyBuilder.GetEmailBody(
+                "https://res.cloudinary.com/devagwa/image/upload/v1762456810/icon-positive-vote-2_jcxdww_a0gaxz.png",
+                        $"Hey {user.FullName},",
+                        "please click the below button to reset you password",
+                        $"{HtmlEncoder.Default.Encode(callbackUrl!)}",
+                        "Reset Password"
+                );
+
+
+                await _emailSender.SendEmailAsync(Input.Email, "Reset Password", body);
 
                 return RedirectToPage("./ForgotPasswordConfirmation");
             }
