@@ -15,6 +15,10 @@ namespace SmartLibrary.Web.Data
         public virtual DbSet<Book> Books { get; set; }
         public virtual DbSet<BookCategory> BookCategories { get; set; }
         public virtual DbSet<BookCopy> BookCopies { get; set; }
+        public virtual DbSet<Subscriber> Subscribers { get; set; }
+        public virtual DbSet<Governorate> Governorates { get; set; }
+        public virtual DbSet<Area> Areas { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             //builder.Entity<Category>()
@@ -31,6 +35,15 @@ namespace SmartLibrary.Web.Data
             builder.Entity<BookCopy>()
                 .Property(b => b.SerialNumber)
                 .HasDefaultValueSql("NEXT VALUE FOR shared.SerialNumber");
+
+            var CascadeFKs = builder.Model.GetEntityTypes()
+                .SelectMany(t => t.GetForeignKeys())
+                .Where(fk => !fk.IsOwnership && fk.DeleteBehavior == DeleteBehavior.Cascade);
+
+            foreach (var fk in CascadeFKs)
+                fk.DeleteBehavior = DeleteBehavior.Restrict;
+
+            base.OnModelCreating(builder);
         }
     }
 }
