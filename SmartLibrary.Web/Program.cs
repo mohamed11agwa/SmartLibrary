@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +41,7 @@ namespace SmartLibrary.Web
                 options.Password.RequiredLength = 8;
                 options.User.RequireUniqueEmail = true;
             });
+            builder.Services.AddDataProtection().SetApplicationName(nameof(SmartLibrary));
 
             builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 

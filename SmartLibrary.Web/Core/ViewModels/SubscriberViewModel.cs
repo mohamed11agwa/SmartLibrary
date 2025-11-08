@@ -8,6 +8,7 @@ namespace SmartLibrary.Web.Core.ViewModels
     public class SubscriberViewModel
     {
         public int Id { get; set; }
+        public string? key { get; set; }
         public string? FullName { get; set; }
         public DateTime DateOfBirth { get; set; } = DateTime.Now;
         public string? NationalId { get; set; } = null!;
