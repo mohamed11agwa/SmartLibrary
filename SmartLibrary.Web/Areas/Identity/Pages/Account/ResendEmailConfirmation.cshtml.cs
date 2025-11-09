@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using SmartLibrary.Web.Consts;
 using SmartLibrary.Web.Core.Models;
 using SmartLibrary.Web.Services;
 using System;
@@ -89,14 +90,16 @@ namespace SmartLibrary.Web.Areas.Identity.Pages.Account
                 pageHandler: null,
                 values: new { userId = userId, code = code },
                 protocol: Request.Scheme);
-            
+            var placeholders = new Dictionary<string, string>()
+                {
+                    {"imageUrl", "https://res.cloudinary.com/devagwa/image/upload/v1762438094/icon-positive-vote-1_rdexez_lxhwam_t0tvln.png"},
+                    {"header", $"Hey {user.FullName}, thanks For Joining Us!" },
+                    {"body", "Please Confirm Your Eamil"},
+                    {"url", $"{HtmlEncoder.Default.Encode(callbackUrl!)}"},
+                    {"linkTitle", "Activate Account!"}
+                };
             //Builder
-            var body = _emailBodyBuilder.GetEmailBody(
-                "https://res.cloudinary.com/devagwa/image/upload/v1762438094/icon-positive-vote-1_rdexez_lxhwam_t0tvln.png",
-                $"Hey {user.FullName}, thanks For Joining Us!",
-                "Please Confirm Your Eamil",
-                $"{HtmlEncoder.Default.Encode(callbackUrl!)}",
-                "Activate Account!");
+            var body = _emailBodyBuilder.GetEmailBody(EmailTemplates.Email, placeholders);
 
             await _emailSender.SendEmailAsync(
                 user.Email,

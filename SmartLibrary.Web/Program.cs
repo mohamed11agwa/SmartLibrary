@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ using SmartLibrary.Web.Services;
 using SmartLibrary.Web.Settings;
 using System.Reflection;
 using UoN.ExpressiveAnnotations.NetCore.DependencyInjection;
+using WhatsAppCloudApi.Extensions;
 
 
 namespace SmartLibrary.Web
@@ -40,6 +42,7 @@ namespace SmartLibrary.Web
                 options.Password.RequiredLength = 8;
                 options.User.RequireUniqueEmail = true;
             });
+            builder.Services.AddDataProtection().SetApplicationName(nameof(SmartLibrary));
 
             builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 
@@ -56,7 +59,8 @@ namespace SmartLibrary.Web
             builder.Services.AddExpressiveAnnotations();
             builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection(nameof(CloudinarySettings)));
             builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
-            
+            builder.Services.AddWhatsAppApiClient(builder.Configuration);
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
