@@ -18,6 +18,7 @@ namespace SmartLibrary.Web.Data
         public virtual DbSet<Subscriber> Subscribers { get; set; }
         public virtual DbSet<Governorate> Governorates { get; set; }
         public virtual DbSet<Area> Areas { get; set; }
+        public virtual DbSet<Subscription> Subscriptions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

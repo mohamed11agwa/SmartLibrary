@@ -73,7 +73,7 @@ namespace SmartLibrary.Web.Controllers
         {
             var decryptedId = int.Parse(_dataProtector.Unprotect(id));
             var subscriber = _context.Subscribers.Include(s => s.Area)
-                .Include(s => s.Governorate).SingleOrDefault(s => s.Id == decryptedId);
+                .Include(s => s.Governorate).Include(s => s.Subscriptions).SingleOrDefault(s => s.Id == decryptedId);
 
             if (subscriber is null)
                 return NotFound();
@@ -126,6 +126,15 @@ namespace SmartLibrary.Web.Controllers
             subscriber.ImageThumbnailUrl = $"{imagePath}/thumb/{imageName}";
             subscriber.CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
+            Subscription subscription = new Subscription()
+            {
+                CreatedById = subscriber.CreatedById,
+                CreatedOn = subscriber.CreatedOn,
+                StartDate = DateTime.Today,
+                EndDate = DateTime.Today.AddYears(1),
+            };
+
+            subscriber.Subscriptions.Add(subscription);
             _context.Add(subscriber);
             _context.SaveChanges();
 
@@ -219,6 +228,75 @@ namespace SmartLibrary.Web.Controllers
             _context.SaveChanges();
 
             return RedirectToAction(nameof(Details), new { id = model.Key });
+        }
+
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RenewSubscription(string sKey)
+        {
+            var subscriberId = int.Parse(_dataProtector.Unprotect(sKey));
+            var subscriber = _context.Subscribers.Include(s => s.Subscriptions).SingleOrDefault(s => s.Id == subscriberId);
+
+            if (subscriber is null)
+                return NotFound();
+            if (subscriber.IsBlackList)
+                return BadRequest();
+
+            var lastSubscription = subscriber.Subscriptions.Last();
+            var StartDate = lastSubscription.EndDate < DateTime.Today ? DateTime.Today : lastSubscription.EndDate.AddDays(1);
+
+            Subscription newSubscription = new Subscription()
+            {
+                CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value,
+                CreatedOn = DateTime.Now,
+                StartDate = StartDate,
+                EndDate = StartDate.AddYears(1)
+            };
+
+            subscriber.Subscriptions.Add(newSubscription);
+            _context.SaveChanges();
+
+
+            // Send welcome email
+            var placeholders = new Dictionary<string, string>()
+                {
+                    {"imageUrl", "https://res.cloudinary.com/devagwa/image/upload/v1762438094/icon-positive-vote-1_rdexez_lxhwam_t0tvln.png"},
+                    {"header", $"Hello {subscriber.FirstName}, " },
+                    {"body", $"Your Subscription Has been Renewed through {newSubscription.EndDate.ToString("d MMM, yyyy")}"}
+                };
+            //Builder
+            var body = _emailBodyBuilder.GetEmailBody(EmailTemplates.Notification, placeholders);
+
+            await _emailSender.SendEmailAsync(subscriber.Email, "SmartLibrary Subscription Renewal", body);
+
+            //Send Welcome Message using WhatsApp
+
+            if (subscriber.HasWhatsApp)
+            {
+                var components = new List<WhatsAppComponent>()
+                    {
+                        new WhatsAppComponent
+                        {
+                             Type = "body",
+                             Parameters = new List<object>()
+                             {
+                                new WhatsAppTextParameter {Text = subscriber.FirstName},
+                                new WhatsAppTextParameter {Text = newSubscription.EndDate.ToString("d MMM, yyyy")}
+                             }
+                        }
+                    };
+
+                var mobilePhone = _webHostEnvironment.IsDevelopment() ? "01128002767" : subscriber.MobilePhone;
+                await _whatsAppClient.SendMessage($"2{mobilePhone}",
+                WhatsAppLanguageCode.English, WhatsAppTemplates.SubscriptionRenew, components);
+
+            }
+            var viewModel = _mapper.Map<SubscriptionViewModel>(newSubscription);
+            return PartialView("_SubscriptionRow", viewModel);
+
         }
 
 
