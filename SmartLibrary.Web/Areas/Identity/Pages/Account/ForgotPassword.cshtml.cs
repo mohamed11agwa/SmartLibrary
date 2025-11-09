@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using SmartLibrary.Web.Consts;
 using SmartLibrary.Web.Core.Models;
 using SmartLibrary.Web.Services;
 
@@ -74,15 +75,16 @@ namespace SmartLibrary.Web.Areas.Identity.Pages.Account
                     values: new { area = "Identity", code },
                     protocol: Request.Scheme);
 
+                var placeholders = new Dictionary<string, string>()
+                {
+                    {"imageUrl", "https://res.cloudinary.com/devagwa/image/upload/v1762456810/icon-positive-vote-2_jcxdww_a0gaxz.png"},
+                    {"header", $"Hey {user.FullName}," },
+                    {"body", "please click the below button to reset you password"},
+                    {"url", $"{HtmlEncoder.Default.Encode(callbackUrl!)}"},
+                    {"linkTitle", "Reset Password"}
+                };
 
-
-                var body = _emailBodyBuilder.GetEmailBody(
-                "https://res.cloudinary.com/devagwa/image/upload/v1762456810/icon-positive-vote-2_jcxdww_a0gaxz.png",
-                        $"Hey {user.FullName},",
-                        "please click the below button to reset you password",
-                        $"{HtmlEncoder.Default.Encode(callbackUrl!)}",
-                        "Reset Password"
-                );
+                var body = _emailBodyBuilder.GetEmailBody(EmailTemplates.Email, placeholders);
 
 
                 await _emailSender.SendEmailAsync(Input.Email, "Reset Password", body);

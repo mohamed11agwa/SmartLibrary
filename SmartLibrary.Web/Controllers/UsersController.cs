@@ -86,17 +86,18 @@ namespace SmartLibrary.Web.Controllers
                     pageHandler: null,
                     values: new { area = "Identity", userId = user.Id, code = code},
                     protocol: Request.Scheme);
+                var placeholders = new Dictionary<string, string>()
+                {
+                    {"imageUrl", "https://res.cloudinary.com/devagwa/image/upload/v1762438094/icon-positive-vote-1_rdexez_lxhwam_t0tvln.png"},
+                    {"header", $"Hey {user.FullName}, thanks For Joining Us!" },
+                    {"body", "Please Confirm Your Eamil"},
+                    {"url", $"{HtmlEncoder.Default.Encode(callbackUrl!)}"},
+                    {"linkTitle", "Activate Account!"}
+                };
 
-                var body = _emailBodyBuilder.GetEmailBody(
-                    "https://res.cloudinary.com/devagwa/image/upload/v1762438094/icon-positive-vote-1_rdexez_lxhwam_t0tvln.png",
-                    $"Hey {user.FullName}, thanks For Joining Us!",
-                    "Please Confirm Your Eamil",
-                    $"{HtmlEncoder.Default.Encode(callbackUrl!)}",
-                    "Activate Account!");
+                var body = _emailBodyBuilder.GetEmailBody(EmailTemplates.Email, placeholders);
 
                 await _emailSender.SendEmailAsync(user.Email, "Confirm your email", body);
-
-                
 
 
                 var userViewModel = _mapper.Map<UserViewModel>(user);

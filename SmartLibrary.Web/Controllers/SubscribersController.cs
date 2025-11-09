@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,10 @@ using SmartLibrary.Web.Core.Models;
 using SmartLibrary.Web.Filters;
 using SmartLibrary.Web.Services;
 using System.Security.Claims;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
+using WhatsAppCloudApi;
+using WhatsAppCloudApi.Services;
 
 namespace SmartLibrary.Web.Controllers
 {
@@ -20,14 +25,22 @@ namespace SmartLibrary.Web.Controllers
         private readonly IMapper _mapper;
         private readonly IImageService _imageService;
         private readonly IDataProtector _dataProtector;
+        private readonly IWhatsAppClient _whatsAppClient;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IEmailBodyBuilder _emailBodyBuilder;
+        private readonly IEmailSender _emailSender;
 
         public SubscribersController(ApplicationDbContext context, IMapper mapper,
-            IImageService imageService, IDataProtectionProvider dataProtector)
+            IImageService imageService, IDataProtectionProvider dataProtector, IWhatsAppClient whatsAppClient, IWebHostEnvironment webHostEnvironment, IEmailBodyBuilder emailBodyBuilder, IEmailSender emailSender)
         {
             _context = context;
             _mapper = mapper;
             _imageService = imageService;
             _dataProtector = dataProtector.CreateProtector("MySecureKey");
+            _whatsAppClient = whatsAppClient;
+            _webHostEnvironment = webHostEnvironment;
+            _emailBodyBuilder = emailBodyBuilder;
+            _emailSender = emailSender;
         }
 
         public IActionResult Index()
@@ -116,8 +129,39 @@ namespace SmartLibrary.Web.Controllers
             _context.Add(subscriber);
             _context.SaveChanges();
 
-            //TODO: Send welcome email
+            // Send welcome email
+            var placeholders = new Dictionary<string, string>()
+                {
+                    {"imageUrl", "https://res.cloudinary.com/devagwa/image/upload/v1762438094/icon-positive-vote-1_rdexez_lxhwam_t0tvln.png"},
+                    {"header", $"Welcome {model.FirstName}, " },
+                    {"body", "thank you for joining SmartLibrary"}
+                };
+            //Builder
+            var body = _emailBodyBuilder.GetEmailBody(EmailTemplates.Notification, placeholders);
 
+            await _emailSender.SendEmailAsync(model.Email,"Welcome to SmartLibrary", body);
+
+            //Send Welcome Message using WhatsApp
+
+            if (model.HasWhatsApp)
+            {
+                    var components = new List<WhatsAppComponent>()
+                    {
+                        new WhatsAppComponent
+                        {
+                             Type = "body",
+                             Parameters = new List<object>()
+                             {
+                                new WhatsAppTextParameter {Text = model.FirstName}
+                             }
+                        }
+                    };
+
+                var mobilePhone = _webHostEnvironment.IsDevelopment() ? "01128002767" : model.MobilePhone;
+                    await _whatsAppClient.SendMessage($"2{mobilePhone}",
+                    WhatsAppLanguageCode.English_US, WhatsAppTemplates.WelcomeMessage, components);
+
+            }
             var encryptedId = _dataProtector.Protect(subscriber.Id.ToString());
             return RedirectToAction(nameof(Details), new { id = encryptedId });
         }
