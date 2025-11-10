@@ -2,7 +2,8 @@
 {
     public class WhatsAppTemplates
     {
-        public const string WelcomeMessage = "greeting_new_subscriber";
-        public const string SubscriptionRenew = "subscription_renew_alert";
+        public const string WelcomeMessage = "hello_welcome";
+        public const string SubscriptionRenew = "subscription_renew";
+        public const string SubscriptionExpiration = "subscription_expiration";
     }
 }
