@@ -18,6 +18,9 @@ namespace SmartLibrary.Web.Data
         public virtual DbSet<Subscriber> Subscribers { get; set; }
         public virtual DbSet<Governorate> Governorates { get; set; }
         public virtual DbSet<Area> Areas { get; set; }
+        public virtual DbSet<Subscription> Subscriptions { get; set; }
+        public virtual DbSet<Rental> Rentals { get; set; }
+        public virtual DbSet<RentalCopy> RentalCopies { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -25,9 +28,8 @@ namespace SmartLibrary.Web.Data
             //    .Property(c => c.CreatedOn)
             //    .HasDefaultValueSql("GETDATE()");
 
-            builder.Entity<BookCategory>()
-                .HasKey(e => new { e.BookId, e.CategoryId});
-            base.OnModelCreating(builder);
+            builder.Entity<BookCategory>().HasKey(e => new { e.BookId, e.CategoryId});
+            builder.Entity<RentalCopy>().HasKey(e => new { e.RentalId, e.BookCopyId});
 
             builder.HasSequence<int>("SerialNumber", schema: "shared")
                 .StartsAt(1000001);

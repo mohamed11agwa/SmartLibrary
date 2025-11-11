@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -72,8 +73,9 @@ namespace SmartLibrary.Web.Controllers
         public IActionResult Details(string id)
         {
             var decryptedId = int.Parse(_dataProtector.Unprotect(id));
-            var subscriber = _context.Subscribers.Include(s => s.Area)
-                .Include(s => s.Governorate).SingleOrDefault(s => s.Id == decryptedId);
+            var subscriber = _context.Subscribers.Include(s => s.Area).Include(s => s.Governorate).Include(s => s.Subscriptions)
+                .Include(s => s.Rentals).ThenInclude(r => r.RentalCopies)
+                .SingleOrDefault(s => s.Id == decryptedId);
 
             if (subscriber is null)
                 return NotFound();
@@ -126,6 +128,15 @@ namespace SmartLibrary.Web.Controllers
             subscriber.ImageThumbnailUrl = $"{imagePath}/thumb/{imageName}";
             subscriber.CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
+            Subscription subscription = new Subscription()
+            {
+                CreatedById = subscriber.CreatedById,
+                CreatedOn = subscriber.CreatedOn,
+                StartDate = DateTime.Today,
+                EndDate = DateTime.Today.AddYears(1),
+            };
+
+            subscriber.Subscriptions.Add(subscription);
             _context.Add(subscriber);
             _context.SaveChanges();
 
@@ -139,10 +150,9 @@ namespace SmartLibrary.Web.Controllers
             //Builder
             var body = _emailBodyBuilder.GetEmailBody(EmailTemplates.Notification, placeholders);
 
-            await _emailSender.SendEmailAsync(model.Email,"Welcome to SmartLibrary", body);
+            BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(model.Email, "Welcome to SmartLibrary", body));
 
             //Send Welcome Message using WhatsApp
-
             if (model.HasWhatsApp)
             {
                     var components = new List<WhatsAppComponent>()
@@ -158,8 +168,9 @@ namespace SmartLibrary.Web.Controllers
                     };
 
                 var mobilePhone = _webHostEnvironment.IsDevelopment() ? "01128002767" : model.MobilePhone;
-                    await _whatsAppClient.SendMessage($"2{mobilePhone}",
-                    WhatsAppLanguageCode.English_US, WhatsAppTemplates.WelcomeMessage, components);
+                BackgroundJob.Enqueue(() => _whatsAppClient.SendMessage($"2{mobilePhone}",
+                WhatsAppLanguageCode.English_US, WhatsAppTemplates.WelcomeMessage, components));
+
 
             }
             var encryptedId = _dataProtector.Protect(subscriber.Id.ToString());
@@ -222,6 +233,75 @@ namespace SmartLibrary.Web.Controllers
         }
 
 
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RenewSubscription(string sKey)
+        {
+            var subscriberId = int.Parse(_dataProtector.Unprotect(sKey));
+            var subscriber = _context.Subscribers.Include(s => s.Subscriptions).SingleOrDefault(s => s.Id == subscriberId);
+
+            if (subscriber is null)
+                return NotFound();
+            if (subscriber.IsBlackList)
+                return BadRequest();
+
+            var lastSubscription = subscriber.Subscriptions.Last();
+            var StartDate = lastSubscription.EndDate < DateTime.Today ? DateTime.Today : lastSubscription.EndDate.AddDays(1);
+
+            Subscription newSubscription = new Subscription()
+            {
+                CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value,
+                CreatedOn = DateTime.Now,
+                StartDate = StartDate,
+                EndDate = StartDate.AddYears(1)
+            };
+
+            subscriber.Subscriptions.Add(newSubscription);
+            _context.SaveChanges();
+
+
+            // Send welcome email
+            var placeholders = new Dictionary<string, string>()
+                {
+                    {"imageUrl", "https://res.cloudinary.com/devagwa/image/upload/v1762438094/icon-positive-vote-1_rdexez_lxhwam_t0tvln.png"},
+                    {"header", $"Hello {subscriber.FirstName}, " },
+                    {"body", $"Your Subscription Has been Renewed through {newSubscription.EndDate.ToString("d MMM, yyyy")}"}
+                };
+            //Builder
+            var body = _emailBodyBuilder.GetEmailBody(EmailTemplates.Notification, placeholders);
+
+            BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(subscriber.Email, "SmartLibrary Subscription Renewal", body));
+
+            //Send Welcome Message using WhatsApp
+
+            if (subscriber.HasWhatsApp)
+            {
+                var components = new List<WhatsAppComponent>()
+                    {
+                        new WhatsAppComponent
+                        {
+                             Type = "body",
+                             Parameters = new List<object>()
+                             {
+                                new WhatsAppTextParameter {Text = subscriber.FirstName},
+                                new WhatsAppTextParameter {Text = newSubscription.EndDate.ToString("d MMM, yyyy")}
+                             }
+                        }
+                    };
+
+                var mobilePhone = _webHostEnvironment.IsDevelopment() ? "01128002767" : subscriber.MobilePhone;
+                BackgroundJob.Enqueue(() => _whatsAppClient.SendMessage($"2{mobilePhone}",
+                                    WhatsAppLanguageCode.English, WhatsAppTemplates.SubscriptionRenew, components));
+
+            }
+            var viewModel = _mapper.Map<SubscriptionViewModel>(newSubscription);
+            return PartialView("_SubscriptionRow", viewModel);
+
+        }
+
+
         public IActionResult AllowNationalId(SubscriberFormViewModel model)
         {
             var subscriberId = 0;
@@ -253,6 +333,50 @@ namespace SmartLibrary.Web.Controllers
             return Json(isAllowed);
         }
 
+
+        //public async Task PrepareExpirationAlert()
+        //{
+        //    var subscribers = _context.Subscribers
+        //        .Include(s => s.Subscriptions).Where(s =>s.Subscriptions.OrderByDescending(x => x.EndDate).First().EndDate == DateTime.Today.AddDays(5))
+        //        .ToList();
+        //    foreach (var subscriber in subscribers)
+        //    {
+        //        // Send welcome email
+        //        var placeholders = new Dictionary<string, string>()
+        //        {
+        //            {"imageUrl", "https://res.cloudinary.com/devagwa/image/upload/v1762775366/calendar_zfohjc_wz495o.png"},
+        //            {"header", $"Hello {subscriber.FirstName}, " },
+        //            {"body", $"Your Subscription will be expired by {subscriber.Subscriptions.Last().EndDate.ToString("d MMM, yyyy")}"}
+        //        };
+        //        //Builder
+        //        var body = _emailBodyBuilder.GetEmailBody(EmailTemplates.Notification, placeholders);
+
+        //        await _emailSender.SendEmailAsync(subscriber.Email, "SmartLibrary Subscription Expiration", body);
+
+
+        //        //Send Welcome Message using WhatsApp
+        //        if (subscriber.HasWhatsApp)
+        //        {
+        //            var components = new List<WhatsAppComponent>()
+        //            {
+        //                new WhatsAppComponent
+        //                {
+        //                     Type = "body",
+        //                     Parameters = new List<object>()
+        //                     {
+        //                        new WhatsAppTextParameter {Text = subscriber.FirstName},
+        //                        new WhatsAppTextParameter {Text = subscriber.Subscriptions.Last().EndDate.ToString("d MMM, yyyy")}
+        //                     }
+        //                }
+        //            };
+
+        //            var mobilePhone = _webHostEnvironment.IsDevelopment() ? "01128002767" : subscriber.MobilePhone;
+
+        //            await _whatsAppClient.SendMessage($"2{mobilePhone}",
+        //                               WhatsAppLanguageCode.English, WhatsAppTemplates.SubscriptionExpiration, components);
+        //        }
+        //    }
+        //}
         private SubscriberFormViewModel PopulateViewModel(SubscriberFormViewModel? model = null)
         {
             SubscriberFormViewModel viewModel = model is null ? new SubscriberFormViewModel() : model;

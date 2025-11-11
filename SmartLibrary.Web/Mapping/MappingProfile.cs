@@ -39,7 +39,9 @@ namespace SmartLibrary.Web.Mapping
 
             //BookCopy
             CreateMap<BookCopy, BookCopyViewModel>()
-                .ForMember(dest => dest.BookTitle, opt => opt.MapFrom(src => src.Book!.Title));
+                .ForMember(dest => dest.BookTitle, opt => opt.MapFrom(src => src.Book!.Title))
+                .ForMember(dest => dest.BookId, opt => opt.MapFrom(src => src.Book!.Id))
+                .ForMember(dest => dest.ImageThumbnailUrl, opt => opt.MapFrom(src => src.Book!.ImageThumbnailUrl));
 
             CreateMap<BookCopy, BookCopyFormViewModel>().ReverseMap();
 
@@ -71,8 +73,16 @@ namespace SmartLibrary.Web.Mapping
             CreateMap<Subscriber, SubscriberViewModel>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"))
                 .ForMember(dest => dest.Area, opt => opt.MapFrom(src => src.Area!.Name))
-                .ForMember(dest => dest.Governorate, opt => opt.MapFrom(src => src.Governorate!.Name));
+                .ForMember(dest => dest.Governorate, opt => opt.MapFrom(src => src.Governorate!.Name))
+                .ForMember(dest => dest.IsBlackListed, opt => opt.MapFrom(src => src.IsBlackList));
 
+
+            CreateMap<Subscription, SubscriptionViewModel>();
+
+
+            //Rentals
+            CreateMap<Rental, RentalViewModel>();
+            CreateMap<RentalCopy, RentalCopyViewModel>();
 
         }
     }
