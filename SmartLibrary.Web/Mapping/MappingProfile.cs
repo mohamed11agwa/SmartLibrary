@@ -76,6 +76,7 @@ namespace SmartLibrary.Web.Mapping
 
 
             CreateMap<Subscription, SubscriptionViewModel>();
+            CreateMap<RentalCopy, RentalCopyViewModel>();
         }
     }
 }
