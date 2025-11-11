@@ -7,7 +7,9 @@ namespace SmartLibrary.Web.Core.ViewModels
         public int Id { get; set; }
 
         public virtual string? BookTitle { get; set; }
+        public virtual int BookId { get; set; }
 
+        public string? ImageThumbnailUrl { get; set; }
         public bool IsAvailableForRental { get; set; }
 
         public int EditionNumber { get; set; }

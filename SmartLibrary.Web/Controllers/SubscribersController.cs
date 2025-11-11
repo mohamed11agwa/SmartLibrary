@@ -73,8 +73,9 @@ namespace SmartLibrary.Web.Controllers
         public IActionResult Details(string id)
         {
             var decryptedId = int.Parse(_dataProtector.Unprotect(id));
-            var subscriber = _context.Subscribers.Include(s => s.Area)
-                .Include(s => s.Governorate).Include(s => s.Subscriptions).SingleOrDefault(s => s.Id == decryptedId);
+            var subscriber = _context.Subscribers.Include(s => s.Area).Include(s => s.Governorate).Include(s => s.Subscriptions)
+                .Include(s => s.Rentals).ThenInclude(r => r.RentalCopies)
+                .SingleOrDefault(s => s.Id == decryptedId);
 
             if (subscriber is null)
                 return NotFound();

@@ -1,0 +1,62 @@
+﻿@model IEnumerable<RentalViewModel>
+
+@if (!Model.Any())
+{
+    <div class="alert bg-light-info border border-info border-3 border-dashed d-flex flex-column flex-sm-row w-100 p-5 mt-10">
+        <!--begin::Icon-->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bell-fill me-4" viewBox="0 0 16 16">
+            <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901" />
+        </svg>
+        <!--begin::Content-->
+        <div class="d-flex flex-column pe-0 pe-sm-10 justify-content-center">
+            <h5 class="mb-0">This Subscriber Has No Rentals Yet!</h5>
+        </div>
+        <!--end::Content-->
+    </div>
+}
+else
+{
+	<div class="table-responsive">
+		<!--begin::Table-->
+		<table class="table align-middle gs-0 gy-4" >
+			<!--begin::Table head-->
+			<thead>
+				<tr class="fw-bold text-muted bg-light">
+					<th class="ps-4 min-w-125px rounded-start">Start Date</th>
+					<th class="min-w-125px"># of Copies</th>
+					<th class="min-w-125px">Total Delays (Days)</th>
+					<th class="min-w-125px">Added On</th>
+					<th class="min-w-200px pe-4 text-end rounded-end"></th>
+				</tr>
+			</thead>
+			<!--end::Table head-->
+			<!--begin::Table body-->
+			<tbody>
+				@foreach (var rental in Model)
+				{
+					<tr>
+						<td>
+							<div class="d-flex align-items-center ps-3">
+								@rental.StartDate.ToString("d MMM, yyyy")
+							</div>
+						</td>
+						<td>
+							@rental.NumberOfCopies
+						</td>
+						<td>
+							@rental.TotalDelayInDays
+						</td>
+						<td>
+							@rental.CreatedOn
+						</td>
+						<td class="text-end pe-4">
+							<a class="btn btn-primary" asp-controller="Rentals" asp-action="Details" asp-route-id="@rental.Id">Details</a>
+						</td>
+					</tr>
+				}
+			</tbody>
+			<!--end::Table body-->
+		</table>
+		<!--end::Table-->
+	</div>
+}

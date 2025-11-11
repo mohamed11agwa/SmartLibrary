@@ -20,6 +20,8 @@
         public const string DenySpecialCharacters = "Special characters are not allowed.";
         public const string InvalidMobileNumber = "Invalid mobile number.";
         public const string InvalidNationalId = "Invalid National ID.";
+        public const string InvalidSerialNumber = "Invalid Serial Number.";
+        public const string NotAvailableRental = "This Book / Copy Is Not Available For Rental.";
         public const string EmptyImage = "Please Select an Image.";
 
     }

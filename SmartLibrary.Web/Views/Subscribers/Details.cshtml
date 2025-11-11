@@ -1,4 +1,5 @@
 ﻿@using SmartLibrary.Web.Consts
+@using SmartLibrary.Web.Core.Enums
 @model SubscriberViewModel
 
 @{
@@ -138,7 +139,7 @@
 							<div class="card-header border-0">
 								<!--begin::Card title-->
 								<div class="card-title">
-									<h2 class="fw-bold">Reward Points</h2>
+									<h2 class="fw-bold"># of Rentals</h2>
 								</div>
 								<!--end::Card title-->
 							</div>
@@ -155,11 +156,10 @@
 										</span>
 										<!--end::Svg Icon-->
 										<div class="ms-2">
-											4,571
-											<span class="text-muted fs-4 fw-semibold">Points earned</span>
+											@Model.Rentals.Sum(r => r.NumberOfCopies)
 										</div>
 									</div>
-									<div class="fs-7 fw-normal text-muted">Earn reward points with every purchase.</div>
+									<div class="fs-7 fw-normal text-muted">Total Number Of Copies.</div>
 								</div>
 							</div>
 							<!--end::Card body-->
@@ -201,14 +201,13 @@
 				</div>
 				<!--begin::Card-->
 				<div class="card pt-4 mb-6 mb-xl-9">
-
-					@if(!Model.IsBlackListed)
-					{
-						<!--begin::Card header-->
-						<div class="card-header border-0 pt-5">
-							<h3 class="card-title align-items-start flex-column">
-								<span class="card-label fw-bold fs-3 mb-1">Renewal History</span>
-							</h3>
+					<!--begin::Card header-->
+					<div class="card-header border-0 pt-5">
+						<h3 class="card-title align-items-start flex-column">
+							<span class="card-label fw-bold fs-3 mb-1">Renewal History</span>
+						</h3>
+						@if(!Model.IsBlackListed)
+						{
 							<div class="card-toolbar">
 								<a href="javascript:;" class="btn btn-sm btn-light-primary js-renew" data-key="@Model.key">
 									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
@@ -218,9 +217,9 @@
 									Renew
 								</a>
 							</div>
-						</div>
-						<!--end::Card header-->
-					}
+						}
+					</div>
+					<!--end::Card header-->
 
 					<!--begin::Card body-->
 					<div class="card-body py-3">
@@ -263,17 +262,27 @@
 				<!--begin::Card-->
 				<div class="card pt-4 mb-6 mb-xl-9">
 					<!--begin::Card header-->
-					<div class="card-header border-0">
-						<!--begin::Card title-->
-						<div class="card-title">
-							<h2>Rentals</h2>
-						</div>
-						<!--end::Card title-->
+					<div class="card-header border-0 pt-5">
+						<h3 class="card-title align-items-start flex-column">
+							<span class="card-label fw-bold fs-3 mb-1">Rentals</span>
+						</h3>
+						@if (!Model.IsBlackListed && lastSubscription.EndDate >= DateTime.Today.AddDays((int)RentalsConfigurations.RentalDuration))
+						{
+							<div class="card-toolbar">
+								<a asp-controller="Rentals" asp-action="Create" asp-route-sKey ="@Model.key" class="btn btn-sm btn-light-primary">
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-square-dotted" viewBox="0 0 16 16">
+										<path d="M2.5 0q-.25 0-.487.048l.194.98A1.5 1.5 0 0 1 2.5 1h.458V0zm2.292 0h-.917v1h.917zm1.833 0h-.917v1h.917zm1.833 0h-.916v1h.916zm1.834 0h-.917v1h.917zm1.833 0h-.917v1h.917zM13.5 0h-.458v1h.458q.151 0 .293.029l.194-.981A2.5 2.5 0 0 0 13.5 0m2.079 1.11a2.5 2.5 0 0 0-.69-.689l-.556.831q.248.167.415.415l.83-.556zM1.11.421a2.5 2.5 0 0 0-.689.69l.831.556c.11-.164.251-.305.415-.415zM16 2.5q0-.25-.048-.487l-.98.194q.027.141.028.293v.458h1zM.048 2.013A2.5 2.5 0 0 0 0 2.5v.458h1V2.5q0-.151.029-.293zM0 3.875v.917h1v-.917zm16 .917v-.917h-1v.917zM0 5.708v.917h1v-.917zm16 .917v-.917h-1v.917zM0 7.542v.916h1v-.916zm15 .916h1v-.916h-1zM0 9.375v.917h1v-.917zm16 .917v-.917h-1v.917zm-16 .916v.917h1v-.917zm16 .917v-.917h-1v.917zm-16 .917v.458q0 .25.048.487l.98-.194A1.5 1.5 0 0 1 1 13.5v-.458zm16 .458v-.458h-1v.458q0 .151-.029.293l.981.194Q16 13.75 16 13.5M.421 14.89c.183.272.417.506.69.689l.556-.831a1.5 1.5 0 0 1-.415-.415zm14.469.689c.272-.183.506-.417.689-.69l-.831-.556c-.11.164-.251.305-.415.415l.556.83zm-12.877.373Q2.25 16 2.5 16h.458v-1H2.5q-.151 0-.293-.029zM13.5 16q.25 0 .487-.048l-.194-.98A1.5 1.5 0 0 1 13.5 15h-.458v1zm-9.625 0h.917v-1h-.917zm1.833 0h.917v-1h-.917zm1.834-1v1h.916v-1zm1.833 1h.917v-1h-.917zm1.833 0h.917v-1h-.917zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z" />
+									</svg>
+									Add Rental
+								</a>
+							</div>
+						}
 					</div>
 					<!--end::Card header-->
 					<!--begin::Card body-->
 					<div class="card-body pt-0 pb-5">
-						Rentals will be shown here
+						
+						<partial name="_Rentals" model="@Model.Rentals"/>
 					</div>
 					<!--end::Card body-->
 				</div>

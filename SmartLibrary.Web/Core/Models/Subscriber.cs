@@ -48,5 +48,6 @@ namespace SmartLibrary.Web.Core.Models
         public bool IsBlackList { get; set; }
 
         public virtual ICollection<Subscription> Subscriptions { get; set; } = new HashSet<Subscription>();
+        public ICollection<Rental> Rentals { get; set; } = new List<Rental>();
     }
 }
