@@ -26,6 +26,7 @@
                             $('#SubscriptionsTable').find('tbody').append(row);
                             var ActiveIcon = $('#ActiveStatusIcon');
                             ActiveIcon.removeClass('d-none');
+                            $('#RentalButton').removeClass('d-none');
                             ActiveIcon.siblings('svg').remove();
                             ActiveIcon.parents('.card').removeClass('bg-warning').addClass('bg-success');
 

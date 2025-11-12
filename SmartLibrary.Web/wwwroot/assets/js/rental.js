@@ -12,11 +12,21 @@ $(document).ready(function () {
         }
 
         if (selectedCopies.length >= maxAllowedCopies) {
-            ShowErrorMessage(`You cannot add more that ${maxAllowedCopies} books`);
+            ShowErrorMessage(`You cannot add more that ${maxAllowedCopies} book(s)`);
             return;
         }
 
         $('#SearchForm').submit();
+    });
+
+    $('body').delegate('.js-remove','click', function () {
+        $(this).parents('.js-copy-container').remove();
+        PrepareInput();
+
+        if ($.isEmptyObject(selectedCopies))
+            $('#CopiesForm').find(':submit').addClass('d-none');
+
+
     });
 });
 function OnAddCopySuccess(copy) {
@@ -24,13 +34,19 @@ function OnAddCopySuccess(copy) {
 
     var bookId = $(copy).find('.js-copy').data('book-id');
 
-    //if (selectedCopies.find(c => c.bookId == bookId)) {
-    //    ShowErrorMessage('You cannot add more than one copy for the same book');
-    //    return;
-    //}
+    if (selectedCopies.find(c => c.bookId == bookId)) {
+        ShowErrorMessage('You cannot add more than one copy for the same book');
+        return;
+    }
 
     $('#CopiesForm').prepend(copy);
+    $('#CopiesForm').find(':submit').removeClass('d-none');
 
+
+    PrepareInput();
+}
+
+function PrepareInput() {
     var copies = $('.js-copy');
 
     selectedCopies = [];
