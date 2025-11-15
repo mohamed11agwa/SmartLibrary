@@ -113,7 +113,7 @@ namespace SmartLibrary.Web
             app.UseHangfireDashboard("/hangfire", new DashboardOptions
             {
                 DashboardTitle = "SmartLibrary Dashboard",
-                IsReadOnlyFunc = (DashboardContext context) => true,
+                //IsReadOnlyFunc = (DashboardContext context) => true,
                 Authorization = new IDashboardAuthorizationFilter[]
                 {
                     new HangfireAuthorizationFilter("AdminsOnly")
@@ -129,6 +129,8 @@ namespace SmartLibrary.Web
                 emailBodyBuilder, emailSender);
 
             RecurringJob.AddOrUpdate(() => hangfireTasks.PrepareExpirationAlert(), "0 14 * * *");
+            RecurringJob.AddOrUpdate(() => hangfireTasks.RentalsExpirationAlert(), "0 14 * * *");
+
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}")
