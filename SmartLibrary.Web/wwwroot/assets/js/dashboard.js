@@ -2,18 +2,21 @@
 
 $(document).ready(function () {
     $('#DateRange').on('DOMSubtreeModified', function () {
+        console.log('changed');
         var selectedRange = $(this).html();
-
+        console.log(selectedRange);
         if (selectedRange !== '') {
             var dateRange = selectedRange.split(' - ');
             chart.destroy();
             drawRentalsChart(dateRange[0], dateRange[1]);
         }
     });
+
+    
 });
 
 drawRentalsChart();
-//drawSubscribersChart();
+drawSubscribersChart();
 
 function drawRentalsChart(startDate = null, endDate = null) {
     var element = document.getElementById('RentalsPerDay');
@@ -29,7 +32,7 @@ function drawRentalsChart(startDate = null, endDate = null) {
     }
 
     $.get({
-        url: `/Dashboard/GetRentalPerDays?startDate=${startDate}&endDate=${endDate}`,
+        url: `/Dashboard/GetRentalsPerDay?startDate=${startDate}&endDate=${endDate}`,
         success: function (data) {
 
             var options = {
@@ -153,62 +156,62 @@ function drawRentalsChart(startDate = null, endDate = null) {
     });
 }
 
-//function drawSubscribersChart() {
+function drawSubscribersChart() {
 
-//    $.get({
-//        url: '/Dashboard/GetSubscribersPerCity',
-//        success: function (figures) {
-//            var ctx = document.getElementById('SubscribersPerCity');
+    $.get({
+        url: '/Dashboard/GetSubscribersPerCity',
+        success: function (figures) {
+            var ctx = document.getElementById('SubscribersPerCity');
 
-//            // Define colors
-//            var primaryColor = KTUtil.getCssVariableValue('--kt-primary');
-//            var dangerColor = KTUtil.getCssVariableValue('--kt-danger');
-//            var successColor = KTUtil.getCssVariableValue('--kt-success');
-//            var warningColor = KTUtil.getCssVariableValue('--kt-warning');
-//            var infoColor = KTUtil.getCssVariableValue('--kt-info');
+            // Define colors
+            var primaryColor = KTUtil.getCssVariableValue('--kt-primary');
+            var dangerColor = KTUtil.getCssVariableValue('--kt-danger');
+            var successColor = KTUtil.getCssVariableValue('--kt-success');
+            var warningColor = KTUtil.getCssVariableValue('--kt-warning');
+            var infoColor = KTUtil.getCssVariableValue('--kt-info');
 
-//            // Define fonts
-//            var fontFamily = KTUtil.getCssVariableValue('--bs-font-sans-serif');
+            // Define fonts
+            var fontFamily = KTUtil.getCssVariableValue('--bs-font-sans-serif');
 
-//            // Chart data
-//            const data = {
-//                labels: figures.map(f => f.label),
-//                datasets: [{
-//                    data: figures.map(f => f.value),
-//                    backgroundColor: [
-//                        infoColor,
-//                        successColor,
-//                        warningColor,
-//                        primaryColor,
-//                        dangerColor,
-//                        '#5F91B6',
-//                        '#D3F6FC',
-//                        '#C8B0D2'
-//                    ],
-//                    borderRadius: 8
-//                }]
-//            };
+            // Chart data
+            const data = {
+                labels: figures.map(f => f.label),
+                datasets: [{
+                    data: figures.map(f => f.value),
+                    backgroundColor: [
+                        infoColor,
+                        successColor,
+                        warningColor,
+                        primaryColor,
+                        dangerColor,
+                        '#5F91B6',
+                        '#D3F6FC',
+                        '#C8B0D2'
+                    ],
+                    borderRadius: 8
+                }]
+            };
 
-//            // Chart config
-//            const config = {
-//                type: 'doughnut',
-//                data: data,
-//                options: {
-//                    plugins: {
-//                        title: {
-//                            display: false,
-//                        }
-//                    },
-//                    responsive: true,
-//                },
-//                defaults: {
-//                    global: {
-//                        defaultFont: fontFamily
-//                    }
-//                }
-//            };
+            // Chart config
+            const config = {
+                type: 'doughnut',
+                data: data,
+                options: {
+                    plugins: {
+                        title: {
+                            display: false,
+                        }
+                    },
+                    responsive: true,
+                },
+                defaults: {
+                    global: {
+                        defaultFont: fontFamily
+                    }
+                }
+            };
 
-//            new Chart(ctx, config);
-//        }
-//    });
-//}
+            new Chart(ctx, config);
+        }
+    });
+}

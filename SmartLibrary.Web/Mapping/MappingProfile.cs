@@ -83,6 +83,9 @@ namespace SmartLibrary.Web.Mapping
             //Rentals
             CreateMap<Rental, RentalViewModel>();
             CreateMap<RentalCopy, RentalCopyViewModel>();
+            CreateMap<RentalCopy, CopyHistoryViewModel>()
+               .ForMember(dest => dest.SubscriberMobile, opt => opt.MapFrom(src => src.Rental!.Subscriber!.MobilePhone))
+               .ForMember(dest => dest.SubscriberName, opt => opt.MapFrom(src => $"{src.Rental!.Subscriber!.FirstName} {src.Rental!.Subscriber!.LastName}"));
 
         }
     }

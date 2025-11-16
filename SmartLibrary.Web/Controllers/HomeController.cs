@@ -5,7 +5,6 @@ using SmartLibrary.Web.Core.ViewModels;
 
 namespace SmartLibrary.Web.Controllers
 {
-    [Authorize(Roles ="Admin")]
 
     public class HomeController : Controller
     {
@@ -17,10 +16,6 @@ namespace SmartLibrary.Web.Controllers
         }
 
         public IActionResult Index()
-        {
-            return View();
-        }
-        public IActionResult Privacy()
         {
             return View();
         }
