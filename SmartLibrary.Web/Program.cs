@@ -1,5 +1,6 @@
 using Hangfire;
 using Hangfire.Dashboard;
+using HashidsNet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
@@ -50,6 +51,8 @@ namespace SmartLibrary.Web
                 options.User.RequireUniqueEmail = true;
             });
             builder.Services.AddDataProtection().SetApplicationName(nameof(SmartLibrary));
+            builder.Services.AddSingleton<IHashids>(_ => new Hashids("f1nd1ngn3m0", minHashLength: 11));
+
 
             builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 
