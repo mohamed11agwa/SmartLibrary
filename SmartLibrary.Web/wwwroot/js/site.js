@@ -25,11 +25,11 @@ function ShowErrorMessage(message = "Something went wrong!") {
     });
 }
 
-function disableSubmitButtons() {
-    $('body :submit').attr('disabled', 'disabled').attr('data-kt-indicator', 'on');
+function disableSubmitButtons(btn) {
+    $(btn).attr('disabled', 'disabled').attr('data-kt-indicator', 'on');
 }
 function OnModalBegin() {
-    disableSubmitButtons();
+    disableSubmitButtons($('#Modal').find(':submit'));
 }
 function OnModalSuccess(row) {
     ShowSuccessMessage();
@@ -182,7 +182,7 @@ $(document).ready(function () {
         } 
 
         var isValid = $(this).valid();
-        if (isValid) disableSubmitButtons();
+        if (isValid) disableSubmitButtons($(this).find(':submit'));
 
     });
 

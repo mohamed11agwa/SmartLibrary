@@ -9,5 +9,7 @@
         public int EditionNumber { get; set; }
         public int SerialNumber { get; set; }
 
+        public virtual ICollection<RentalCopy> Rentals { get; set; } = new List<RentalCopy>(); 
+
     }
 }

@@ -14,6 +14,12 @@
 
     </td>
     <td>@Model.CreatedOn</td>
+
+    <td>
+        <a class="btn btn-light-primary btn-sm" asp-controller="BookCopies" asp-action="RentalHistory" asp-route-id="@Model.Id">History</a>
+    </td>
+
+
     <td>
         <button type="button" class="btn btn-sm btn-icon btn-color-primary btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
             <!--begin::Svg Icon | path: icons/duotune/general/gen024.svg-->

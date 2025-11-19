@@ -1,28 +1,39 @@
 ﻿@model BookViewModel
-@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery antiforgery
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = Model.Title;
 }
-<div class="content flex-column-fluid" id="kt_content">
+
+<div class="content flex-column-fluid p-10" id="kt_content">
+    <ul class="breadcrumb breadcrumb-dot fw-semibold text-gray-600 fs-7 mb-5">
+        <!--begin::Item-->
+        <li class="breadcrumb-item text-gray-600">
+            <a href="/" class="text-gray-600 text-hover-primary">Home</a>
+        </li>
+        <!--end::Item-->
+        <!--begin::Item-->
+        <li class="breadcrumb-item text-gray-600">
+            <a asp-controller="Search" asp-action="Index" class="text-gray-600 text-hover-primary">Find a book</a>
+        </li>
+        <!--end::Item-->
+        <!--begin::Item-->
+        <li class="breadcrumb-item text-gray-500">@Model.Title</li>
+        <!--end::Item-->
+    </ul>
     <!--begin::Navbar-->
     <div class="card mb-9">
         <div class="card-body pt-9 pb-0">
-
             <!--begin::Details-->
             <div class="d-flex flex-wrap flex-sm-nowrap mb-6">
-
                 <!--begin::Image-->
                 <div class="d-flex flex-center flex-shrink-0 bg-light rounded w-100px h-100px w-lg-150px h-lg-150px me-7 mb-4">
-                    <a data-fslightbox href="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/books/no-cover_book.jpg" : Model.ImageUrl)">
-                        <img class="mw-50px mw-lg-75px" src="@(string.IsNullOrEmpty(Model.ImageThumbnailUrl) ? "/images/books/no-cover_book.jpg" : Model.ImageThumbnailUrl)" alt="@Model.Title" />
+                    <a data-fslightbox href="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/books/no-book.jpg" : Model.ImageUrl)">
+                        <img class="mw-50px mw-lg-75px" src="@(string.IsNullOrEmpty(Model.ImageThumbnailUrl) ? "/images/books/no-book.jpg" : Model.ImageThumbnailUrl)" alt="@Model.Title" />
                     </a>
                 </div>
                 <!--end::Image-->
-
                 <!--begin::Wrapper-->
                 <div class="flex-grow-1">
-
                     <!--begin::Head-->
                     <div class="d-flex justify-content-between align-items-start flex-wrap mb-2">
                         <!--begin::Details-->
@@ -49,16 +60,8 @@
                             <!--end::Description-->
                         </div>
                         <!--end::Details-->
-
-                        <!--begin::Actions-->
-                        <div class="d-flex mb-4">
-                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-primary me-3">Edit</a>
-                        </div>
-                        <!--end::Actions-->
                     </div>
                     <!--end::Head-->
-
-
                     <!--begin::Info-->
                     <div class="d-flex flex-wrap justify-content-start">
                         <!--begin::Stats-->
@@ -137,14 +140,7 @@
                 <!--end::Wrapper-->
             </div>
             <!--end::Details-->
-
-
-
-
-
-
             <div class="separator"></div>
-
             <!--begin::Nav-->
             <ul class="nav nav-stretch nav-line-tabs nav-line-tabs-2x border-transparent fs-5 fw-bold">
                 <!--begin::Nav item-->
@@ -158,17 +154,10 @@
                 </li>
             </ul>
             <!--end::Nav-->
-
         </div>
     </div>
     <!--end::Navbar-->
-
-
-
-
-
     <div class="tab-content">
-
         <!--begin::Card-->
         <div id="Description" class="card tab-pane fade show active">
             <!--begin::Card header-->
@@ -183,7 +172,6 @@
             </div>
         </div>
         <!--end::Card-->
-
         <!--begin::Card-->
         <div id="Copies" class="card tab-pane fade">
             <!--begin::Card header-->
@@ -191,25 +179,25 @@
                 <!--begin::Card title-->
                 <div class="card-title fs-3 fw-bold">Copies</div>
                 <!--end::Card title-->
-                <div class="align-self-center">
-                    <a href="javascript:;" class="btn btn-sm btn-primary d-flex align-items-center js-render-modal"
-                       data-title="Add Copy" data-url="/BookCopies/Create?BookId=@Model.Id">
-                        <i class="bi bi-plus-square-dotted"></i>
-                        Add
-                    </a>
-                </div>
             </div>
             <!--end::Card header-->
             <div class="card-body">
-                <div class="@(Model.BookCopies.Any()? "d-none" : string.Empty) alert  bg-light-warning border border-warning border-3 border-dashed d-flex flex-column flex-sm-row w-100 p-5 mb-10 js-alert">
+                <div class="@(Model.BookCopies.Any() ? "d-none" : string.Empty) alert alert-dismissible bg-light-warning border border-warning border-3 border-dashed d-flex flex-column flex-sm-row w-100 p-5 mb-10 js-alert">
                     <!--begin::Icon-->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="text-warning bi bi-exclamation-circle-fill align-self-center me-4" viewBox="0 0 16 16">
-                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4m.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2" />
-                    </svg>
+                    <!--begin::Svg Icon | path: icons/duotune/general/gen007.svg-->
+                    <span class="svg-icon svg-icon-2hx svg-icon-warning me-4 mb-5 mb-sm-0">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect opacity="0.3" x="2" y="2" width="20" height="20" rx="10" fill="currentColor" />
+                            <rect x="11" y="14" width="7" height="2" rx="1" transform="rotate(-90 11 14)" fill="currentColor" />
+                            <rect x="11" y="17" width="2" height="2" rx="1" transform="rotate(-90 11 17)" fill="currentColor" />
+                        </svg>
+                    </span>
+                    <!--end::Svg Icon-->
+                    <!--end::Icon-->
                     <!--begin::Content-->
                     <div class="d-flex flex-column pe-0 pe-sm-10">
                         <h5 class="mb-1">No Copies</h5>
-                        <span>There Is No Copies Available For this book yet!</span>
+                        <span>No copies available for this book yet.</span>
                     </div>
                     <!--end::Content-->
                 </div>
@@ -219,16 +207,20 @@
                             <th>Serial Number</th>
                             <th>Edition</th>
                             <th>Rental?</th>
-                            <th>Status</th>
-                            <th>Created On</th>
-                            <th>Rental History</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var copy in Model.BookCopies.OrderByDescending(c => c.Id))
                         {
-                            <partial name="_BookCopyRow" model="@copy" />
+                            <tr>
+                                <td>@copy.SerialNumber</td>
+                                <td>@copy.EditionNumber</td>
+                                <td>
+                                    <span class="badge badge-light-@(copy.IsAvailableForRental ? "success" : "warning")">
+                                        @(copy.IsAvailableForRental ? "Available" : "Not Available")
+                                    </span>
+                                </td>
+                            </tr>
                         }
                     </tbody>
                 </table>
@@ -238,13 +230,7 @@
     </div>
 </div>
 
-<input type="hidden" name="__RequestVerificationToken" value="@antiforgery.GetAndStoreTokens(Context).RequestToken" />
-
-@section Plugins {
+@section Plugins
+{
     <script src="~/assets/plugins/fslightbox/fslightbox.bundle.js"></script>
-}
-@section Scripts {
-    <partial name="_ValidationScriptsPartial"/>
-
-    <script src="~/assets/js/book-details.js" asp-append-version="true"></script>
 }

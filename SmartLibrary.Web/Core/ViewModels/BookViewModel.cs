@@ -5,6 +5,8 @@ namespace SmartLibrary.Web.Core.ViewModels
     public class BookViewModel
     {
         public int Id { get; set; }
+
+        public string? Key { get; set; }
         public string Title { get; set; } = null!;
         public string Publisher { get; set; } = null!;
         public DateTime PublishingDate { get; set; }
