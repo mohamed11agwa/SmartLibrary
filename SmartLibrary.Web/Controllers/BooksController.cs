@@ -52,6 +52,7 @@ namespace SmartLibrary.Web.Controllers
         }
 
         [HttpPost]
+        [IgnoreAntiforgeryToken]
         public IActionResult GetBooks()
         {
             var skip = int.Parse(Request.Form["start"]);
