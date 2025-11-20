@@ -20,8 +20,11 @@ namespace SmartLibrary.Web.Controllers
 
         public IActionResult Index()
         {
+            //return  NotFound();
+
+
             //var numberOfCopies = _context.BookCopies.Count(c => !c.IsDeleted);
-            var numberOfSubscribers= _context.Subscribers.Count(c => !c.IsDeleted);
+            var numberOfSubscribers = _context.Subscribers.Count(c => !c.IsDeleted);
             var numberOfCopies = _context.Books.Count(c => !c.IsDeleted);
 
             numberOfCopies = numberOfCopies <= 10 ? numberOfCopies : numberOfCopies / 10 * 10;

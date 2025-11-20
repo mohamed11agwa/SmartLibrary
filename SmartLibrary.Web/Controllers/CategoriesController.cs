@@ -23,7 +23,7 @@ namespace SmartLibrary.Web.Controllers
 
         public IActionResult Index()
         {
-            
+            //return BadRequest();
             var categories = _context.Categories.AsNoTracking().ToList();
             var viewModel = _mapper.Map<IEnumerable<CategoryViewModel>>(categories);
 

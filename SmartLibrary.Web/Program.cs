@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Client;
+using Serilog;
+using Serilog.Context;
 using SmartLibrary.Web.Consts;
 using SmartLibrary.Web.Core.Models;
 using SmartLibrary.Web.Data;
@@ -20,6 +22,7 @@ using SmartLibrary.Web.Services;
 using SmartLibrary.Web.Settings;
 using SmartLibrary.Web.Tasks;
 using System.Reflection;
+using System.Security.Claims;
 using UoN.ExpressiveAnnotations.NetCore.DependencyInjection;
 using WhatsAppCloudApi.Extensions;
 using WhatsAppCloudApi.Services;
@@ -80,6 +83,11 @@ namespace SmartLibrary.Web
                 policy.RequireRole(AppRoles.Admin);
             }));
 
+            //Add Serilog
+            Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger();
+            builder.Host.UseSerilog();
+
+
             var app = builder.Build();
 
 
@@ -90,10 +98,11 @@ namespace SmartLibrary.Web
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseStatusCodePagesWithReExecute("/Home/Error", "?statusCode={0}");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            app.UseStatusCodePagesWithReExecute("/Home/Error", "?statusCode={0}");
 
             app.UseHttpsRedirection();
             app.UseRouting();
@@ -133,6 +142,18 @@ namespace SmartLibrary.Web
 
             RecurringJob.AddOrUpdate(() => hangfireTasks.PrepareExpirationAlert(), "0 14 * * *");
             RecurringJob.AddOrUpdate(() => hangfireTasks.RentalsExpirationAlert(), "0 14 * * *");
+
+
+            app.Use(async (context, next) =>
+            {
+                LogContext.PushProperty("UserId", context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                LogContext.PushProperty("UserName", context.User.FindFirst(ClaimTypes.Name)?.Value);
+
+                await next();
+            });
+
+            app.UseSerilogRequestLogging();
+
 
             app.MapControllerRoute(
                 name: "default",
