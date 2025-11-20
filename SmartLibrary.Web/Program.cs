@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Client;
@@ -14,6 +15,7 @@ using Serilog.Context;
 using SmartLibrary.Web.Consts;
 using SmartLibrary.Web.Core.Models;
 using SmartLibrary.Web.Data;
+using SmartLibrary.Web.Extensions;
 using SmartLibrary.Web.Filters;
 using SmartLibrary.Web.Helpers;
 using SmartLibrary.Web.Mapping;
@@ -36,52 +38,8 @@ namespace SmartLibrary.Web
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
-            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultUI()
-                .AddDefaultTokenProviders();
-
-
-            builder.Services.Configure<IdentityOptions>(options =>
-            {
-                // Default Password settings.
-                options.Password.RequiredLength = 8;
-                options.User.RequireUniqueEmail = true;
-            });
-            builder.Services.AddDataProtection().SetApplicationName(nameof(SmartLibrary));
-            builder.Services.AddSingleton<IHashids>(_ => new Hashids("f1nd1ngn3m0", minHashLength: 11));
-
-
-            builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
-
-            builder.Services.AddTransient<IImageService, ImageService>();
-            builder.Services.AddTransient<IEmailSender, EmailSender>();
-            builder.Services.AddTransient<IEmailBodyBuilder, EmailBodyBuilder>();
-
-            builder.Services.Configure<SecurityStampValidatorOptions>(opt => opt.ValidationInterval =TimeSpan.Zero);
-
-            builder.Services.AddControllersWithViews();
-
-            builder.Services.AddAutoMapper(op => op.AddProfile<MappingProfile>());
-
-            builder.Services.AddExpressiveAnnotations();
-            builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection(nameof(CloudinarySettings)));
-            builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
-            builder.Services.AddWhatsAppApiClient(builder.Configuration);
-
-            //Hangfire
-            builder.Services.AddHangfire(x => x.UseSqlServerStorage(connectionString));
-            builder.Services.AddHangfireServer();
-            builder.Services.Configure<AuthorizationOptions>(options =>options.AddPolicy("AdminsOnly", policy =>
-            {
-                policy.RequireAuthenticatedUser();
-                policy.RequireRole(AppRoles.Admin);
-            }));
+            builder.Services.AddSmartLibraryServices(builder);
 
             //Add Serilog
             Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger();
@@ -89,6 +47,8 @@ namespace SmartLibrary.Web
 
 
             var app = builder.Build();
+
+
 
 
             // Configure the HTTP request pipeline.
@@ -106,7 +66,18 @@ namespace SmartLibrary.Web
 
             app.UseHttpsRedirection();
             app.UseRouting();
+            app.UseCookiePolicy(new CookiePolicyOptions
+            {
+                Secure = CookieSecurePolicy.Always
+            });
 
+
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers.Add("X-Frame-Options", "Deny");
+
+                await next();
+            });
             app.UseAuthentication();
             app.UseAuthorization();
 
